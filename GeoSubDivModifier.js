@@ -128,7 +128,11 @@ THREE.GeometryUtils.sdDataToFaces = function(originalPoints, midPointMap, newFac
 
 		//console.log('p1: %s, p2: %s', util.inspect(p1), util.inspect(p2));
 
-		return p1.add(p2).divideScalar(2);
+		return new THREE.Vector3(
+			(p1.x + p2.x)/2,
+			(p1.y + p2.y)/2,
+			(p1.z + p2.z)/2
+		).normalize()
 
 	}
 
@@ -222,63 +226,6 @@ THREE.GeoSubDivModifier.prototype.smoothOld = function ( oldGeometry ) {
 		if (console)
 		console.log.apply(console, arguments);
 
-	}
-
-	function f4( a, b, c, d, oldFace, orders, facei ) {
-
-		// TODO move vertex selection over here!
-
-		var newFace = new THREE.Face4( a, b, c, d, null, oldFace.color, oldFace.materialIndex );
-
-		if (scope.useOldVertexColors) {
-
-			newFace.vertexColors = []; 
-
-			var color, tmpColor, order;
-
-			for (var i=0;i<4;i++) {
-
-				order = orders[i];
-
-				color = new THREE.Color(),
-				color.setRGB(0,0,0);
-
-				for (var j=0, jl=0; j<order.length;j++) {
-					tmpColor = oldFace.vertexColors[order[j]-1];
-					color.r += tmpColor.r;
-					color.g += tmpColor.g;
-					color.b += tmpColor.b;
-				}
-
-				color.r /= order.length;
-				color.g /= order.length;
-				color.b /= order.length;
-
-				newFace.vertexColors[i] = color;
-
-			}
-
-		}
-
-		newFaces.push( newFace );
-
-		if (scope.supportUVs) {
-
-			var aUv = [
-				getUV(a, ''),
-				getUV(b, facei),
-				getUV(c, facei),
-				getUV(d, facei)
-			];
-
-			if (!aUv[0]) debug('a :( ', a+':'+facei);
-			else if (!aUv[1]) debug('b :( ', b+':'+facei);
-			else if (!aUv[2]) debug('c :( ', c+':'+facei);
-			else if (!aUv[3]) debug('d :( ', d+':'+facei);
-			else 
-				newUVs.push( aUv );
-
-		}
 	}
 
 	var originalPoints = oldGeometry.vertices;

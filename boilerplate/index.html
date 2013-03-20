@@ -113,7 +113,7 @@
 			var geometry	= new THREE.CubeGeometry( 2, 2, 2 );
 
             geometry =  new THREE.IcosahedronGeometry(1);
-            var ss = new THREE.GeoSubDivModifier(1);
+            var ss = new THREE.GeoSubDivModifier(5);
             console.log('ss:', ss);
 
             ss.modify(geometry);
