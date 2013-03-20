@@ -1,0 +1,23 @@
+{
+	"name":         "GeoSphere",
+	"version":      "0.0.1",
+	"private":      true,
+	"scripts":      {
+	},
+	"dependencies": {
+		"three":     ">= 0.56",
+		"underscore":   ">=1.4.3",
+		"moment-range": ">=0.1.3",
+		"moment":       ">= 2.0.0",
+		"mocha":        "0.3.0",
+		"spec":         "*",
+		"assert":       "*",
+		"should":       "1.2.1",
+		"async":        "0.1.22",
+		"chai":         "1.4.2",
+		"mkdirp":       "0.3.4",
+		"rmdir":        "1.0.0",
+	    "canvas":        "*"
+	},
+	"test":         "mocha tests -R spec"
+}

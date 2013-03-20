@@ -1,3 +1,4 @@
 .DS_Store
 /boilerplate/vendor/three.js/
 /boilerplate/vendor/threex/docs/
+/node_modules/

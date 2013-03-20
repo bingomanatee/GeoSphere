@@ -4,11 +4,12 @@
 		<title>learningthree.js boiler plate for three.js</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		
-			
-		<script src="../libs/Three/build/three.js"></script>
+
+
+        <script src="../node_modules/underscore/underscore-min.js"></script>
+        <script src="../libs/Three/build/three.js"></script>
         <script src="../libs/Three/examples/js/controls/TrackballControls.js"></script>
-        <script src="../libs/Three/examples/js/modifiers/SubdivisionModifier.js"></script>
+        <script src="../GeoSubDivModifier.js"></script>
 		<script src="../libs/Three/examples/js/Detector.js"></script>
 		<!-- https://github.com/mrdoob/stats.js -->
 		<script src="../libs/Three/examples/js/libs/stats.min.js"></script>
@@ -112,7 +113,8 @@
 			var geometry	= new THREE.CubeGeometry( 2, 2, 2 );
 
             geometry =  new THREE.IcosahedronGeometry(1);
-            var ss = new THREE.SubdivisionModifier(4);
+            var ss = new THREE.GeoSubDivModifier(1);
+            console.log('ss:', ss);
 
             ss.modify(geometry);
 

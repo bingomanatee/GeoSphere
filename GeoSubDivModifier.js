@@ -26,8 +26,13 @@
  *		selective subdivision
  */
 
+if (typeof module !== 'undefined'){
+	var THREE = require('three');
+	var _ = require('underscore');
+	var util = require('util');
+}
 
-THREE.SubdivisionModifier = function ( subdivisions ) {
+THREE.GeoSubDivModifier = function ( subdivisions ) {
 
 	this.subdivisions = (subdivisions === undefined ) ? 1 : subdivisions;
 
@@ -38,8 +43,13 @@ THREE.SubdivisionModifier = function ( subdivisions ) {
 
 };
 
+
+if (typeof module !== 'undefined'){
+ module.exports = THREE.GeoSubDivModifier;
+}
+
 // Applies the "modify" pattern
-THREE.SubdivisionModifier.prototype.modify = function ( geometry ) {
+THREE.GeoSubDivModifier.prototype.modify = function ( geometry ) {
 
 	var repeats = this.subdivisions;
 
@@ -59,23 +69,21 @@ THREE.GeometryUtils.orderedKey = function ( a, b ) {
 
 
 // Returns a hashmap - of { edge_key: face_index }
-THREE.GeometryUtils.computeTriangularFaces = function ( geometry ) {
+THREE.GeometryUtils.subdivideTriangles = function ( geometry ) {
 
-	var i, il, v1, v2, j, k,
-		face, faceIndices, faceIndex,
-		edge,
-		hash,
-		edgeFaceMap = {};
+	var i, il,
+		face,
+		midPointMap = {};
 
 	var orderedKey = THREE.GeometryUtils.orderedKey;
 
 	function mapEdgeHash( hash, i ) {
 
-		if ( edgeFaceMap[ hash ] === undefined ) {
-			edgeFaceMap[ hash ] = [];
+		if ( midPointMap[ hash ] === undefined ) {
+			midPointMap[ hash ] = [];
 		}
 
-		edgeFaceMap[ hash ].push( i );
+		midPointMap[ hash ].push( i );
 	}
 
 	var newFaces = [];
@@ -102,90 +110,87 @@ THREE.GeometryUtils.computeTriangularFaces = function ( geometry ) {
 
 	}
 
-	return [edgeFaceMap, newFaces];
-
-}
-
-THREE.GeometryUtils.computeEdgeFaces = function ( geometry ) {
-
-	var i, il, v1, v2, j, k,
-		face, faceIndices, faceIndex,
-		edge,
-		hash,
-		edgeFaceMap = {};
-
-	var orderedKey = THREE.GeometryUtils.orderedKey;
-
-	function mapEdgeHash( hash, i ) {
-
-		if ( edgeFaceMap[ hash ] === undefined ) {
-
-			edgeFaceMap[ hash ] = [];
-
-		}
-
-		edgeFaceMap[ hash ].push( i );
-	}
-
-
-	// construct vertex -> face map
-
-	for( i = 0, il = geometry.faces.length; i < il; i ++ ) {
-
-		face = geometry.faces[ i ];
-
-		if ( face instanceof THREE.Face3 ) {
-
-			hash = orderedKey( face.a, face.b );
-			mapEdgeHash( hash, i );
-
-			hash = orderedKey( face.b, face.c );
-			mapEdgeHash( hash, i );
-
-			hash = orderedKey( face.c, face.a );
-			mapEdgeHash( hash, i );
-
-		} else if ( face instanceof THREE.Face4 ) {
-
-			hash = orderedKey( face.a, face.b );
-			mapEdgeHash( hash, i );
-
-			hash = orderedKey( face.b, face.c );
-			mapEdgeHash( hash, i );
-
-			hash = orderedKey( face.c, face.d );
-			mapEdgeHash( hash, i );
-
-			hash = orderedKey( face.d, face.a );
-			mapEdgeHash( hash, i );
-
-		}
-
-	}
-
-	// extract faces
-
-	// var edges = [];
-	//
-	// var numOfEdges = 0;
-	// for (i in edgeFaceMap) {
-	// 	numOfEdges++;
-	//
-	// 	edge = edgeFaceMap[i];
-	// 	edges.push(edge);
-	//
-	// }
-
-	//debug('edgeFaceMap', edgeFaceMap, 'geometry.edges',geometry.edges, 'numOfEdges', numOfEdges);
-
-	return edgeFaceMap;
+	return [midPointMap, newFaces];
 
 }
 
 /////////////////////////////
 
+THREE.GeometryUtils.sdDataToFaces = function(originalPoints, midPointMap, newFaces){
+
+	var newPoints = originalPoints.concat(); // New set of vertices to work on
+
+	function midPoint(a, b){
+	//	console.log('mid point for %s and %s', util.inspect(a), util.inspect(b));
+
+		var p1 = originalPoints[a];
+		var p2 = originalPoints[b];
+
+		//console.log('p1: %s, p2: %s', util.inspect(p1), util.inspect(p2));
+
+		return p1.add(p2).divideScalar(2);
+
+	}
+
+	_.each(midPointMap, function(value, key){
+	//	console.log('value: %s, key: %s', value, key);
+		var values = _.map(key.split('_'), function(v){ return parseInt(v)});
+	//	console.log('values: %s', util.inspect(values));
+
+		var pt = midPoint(values[0], values[1]);
+
+	// 	console.log('average Point: %s', util.inspect(pt));
+
+		midPointMap[key] = newPoints.length;
+		newPoints.push(pt);
+	}, this);
+
+	function _point(n){
+		if (isNaN(n)){
+			return midPointMap[n];
+		} else {
+			return n;
+		}
+	}
+
+	var newFaces = _.map(newFaces, function(face){
+		var a = _point(face[0]);
+		var b = _point(face[1]);
+		var c = _point(face[2]);
+		return new THREE.Face3(a, b, c);
+	});
+
+	return [newPoints, newFaces];
+};
+
 // Performs an iteration of Catmull-Clark Subdivision
-THREE.GeoSubDivModifier.prototype.smooth = function ( oldGeometry ) {
+
+
+THREE.GeoSubDivModifier.prototype.smooth = function(oldGeometry ){
+
+	var originalPoints = oldGeometry.vertices;
+
+	var data = THREE.GeometryUtils.subdivideTriangles(oldGeometry);
+	var newData = THREE.GeometryUtils.sdDataToFaces(originalPoints, data[0], data[1]);
+
+	var newGeometry = oldGeometry; // Let's pretend the old geometry is now new :P
+	newGeometry.vertices =  newData[0];
+	newGeometry.faces = newData[1];
+
+	newGeometry.vertices = _.map(newGeometry.vertices, function(v){
+		return v; //.normalize();
+	})
+
+	delete newGeometry.__tmpVertices; // makes __tmpVertices undefined :P
+
+	newGeometry.computeCentroids();
+	newGeometry.computeFaceNormals();
+	newGeometry.computeVertexNormals();
+
+	return newGeometry;
+};
+
+THREE.GeoSubDivModifier.prototype.smoothOld = function ( oldGeometry ) {
 
 	//debug( 'running smooth' );
 
