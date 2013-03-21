@@ -57,6 +57,37 @@ THREE.GeoSubDivModifier.prototype.modify = function ( geometry ) {
 		this.smooth( geometry );
 	}
 
+/*
+	var ss2 = new THREE.SubdivisionModifier(1);
+	ss2.supportUVs = false;
+	ss2.modify(geometry);
+
+	THREE.GeometryUtils.collapseToHexes(geometry); */
+
+	return geometry;
+};
+
+THREE.GeometryUtils.collapseToHexes = function(geometry){
+
+	var edges = _.map(geometry.vertices, function(){
+		return [];
+	})
+
+	_.each(geometry.faces, function(face){
+		var points = [face.a, face.b, face.c];
+
+		if(face.hasOwnProperty('d')){
+			points.push(face.d);
+		}
+
+		_.each(points, function(point){
+			edges[point] = edges[point].concat(points);
+		})
+
+		edges = _.map(edges, function(edgePoints, point){
+			return _.difference(_.uniq(edgePoints), [point]);
+		})
+	});
 };
 
 /// REFACTORING THIS OUT
@@ -66,6 +97,31 @@ THREE.GeometryUtils.orderedKey = function ( a, b ) {
 	return Math.min( a, b ) + "_" + Math.max( a, b );
 
 };
+
+THREE.GeometryUtils.analyzeNormals = function (geometry){
+	var center = _.reduce(
+		geometry.vertices,
+		function(c, v){
+			c.add(v);
+			return c;
+		},
+	new THREE.Vector3(0, 0, 0)
+	);
+	var l = geometry.vertices.length;
+	center.divideScalar(l);
+
+	_.each(geometry.faces, function(face){
+
+		console.log('normal: ', face.normal, 'centroid: ', face.centroid);
+		var endOffset = new THREE.Vector3().copy(face.normal).add(face.centroid).sub(center);
+		var centroidOffset = new THREE.Vector3().copy(face.centroid).sub(center);
+		console.log('endOffset:', endOffset, 'length', endOffset.length());
+		console.log('centroidOffset:', centroidOffset, 'length', centroidOffset.length());
+		if (endOffset.length() < centroidOffset.length()){
+			console.log('========== bad face', face);
+		}
+	})
+}
 
 
 // Returns a hashmap - of { edge_key: face_index }
@@ -182,7 +238,7 @@ THREE.GeoSubDivModifier.prototype.smooth = function(oldGeometry ){
 	newGeometry.faces = newData[1];
 
 	newGeometry.vertices = _.map(newGeometry.vertices, function(v){
-		return v; //.normalize();
+		return v.normalize();
 	})
 
 	delete newGeometry.__tmpVertices; // makes __tmpVertices undefined :P
