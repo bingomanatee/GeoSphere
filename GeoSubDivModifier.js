@@ -225,6 +225,31 @@ THREE.GeometryUtils.sdDataToFaces = function(originalPoints, midPointMap, newFac
 
 // Performs an iteration of Catmull-Clark Subdivision
 
+// Angle around the Y axis, counter-clockwise when looking from above.
+
+function azimuth( vector ) {
+
+	return Math.atan2( vector.z, -vector.x );
+
+}
+
+
+// Angle above the XZ plane.
+
+function inclination( vector ) {
+
+	return Math.atan2( -vector.y, Math.sqrt( ( vector.x * vector.x ) + ( vector.z * vector.z ) ) );
+
+}
+// Texture fixing helper. Spheres have some odd behaviours.
+
+function correctUV( uv, vector, azimuth ) {
+
+	if ( ( azimuth < 0 ) && ( uv.x === 1 ) ) uv = new THREE.Vector2( uv.x - 1, uv.y );
+	if ( ( vector.x === 0 ) && ( vector.z === 0 ) ) uv = new THREE.Vector2( azimuth / 2 / Math.PI + 0.5, uv.y );
+	return uv;
+
+}
 
 THREE.GeoSubDivModifier.prototype.smooth = function(oldGeometry ){
 

@@ -28,3 +28,12 @@ body {
 	right		: 5px;
 	padding		: 5px;
 }
+
+#cursor {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    right: 2em;
+    bottom: 2em;
+    background-color: red;
+}

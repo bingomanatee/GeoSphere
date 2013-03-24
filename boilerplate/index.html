@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
 
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+    <script src="http://code.createjs.com/easeljs-0.6.0.min.js"></script>
+
     <script src="../node_modules/underscore/underscore-min.js"></script>
     <script src="../libs/Three/build/three.js"></script>
     <script src="../libs/Three/examples/js/modifiers/SubdivisionModifier.js"></script>
@@ -20,178 +24,27 @@
     <script src="vendor/threex/THREEx.WindowResize.js"></script>
     <script src="vendor/threex.dragpancontrols.js"></script>
 
-    <link  href="css/main.css" rel="stylesheet"/>
+    <link href="css/main.css" rel="stylesheet"/>
 </head>
 <body>
 <!-- three.js container -->
 <div id="container"></div>
+<div id="cursor"></div>
 <!-- info on screen display -->
 <div id="info">
     <div class="top">
-        <a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/" target="_blank">LearningThree.js</a>
+        <a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/"
+           target="_blank">LearningThree.js</a>
         boiler plate for
         <a href="https://github.com/mrdoob/three.js/" target="_blank">three.js</a>
     </div>
-    <div class="bottom" id="inlineDoc" >
+    <div class="bottom" id="inlineDoc">
         - <i>p</i> for screenshot
     </div>
 </div>
 
-<script type="text/javascript">
-    var stats, scene, renderer, composer;
-    var camera, cameraControl;
+<script type="text/javascript" src="script.js">
 
-    if( !init() )	animate();
-
-    // init the scene
-    function init(){
-
-        if( Detector.webgl ){
-            console.log('web gl renderer');
-            renderer = new THREE.WebGLRenderer({
-                antialias		: true,	// to get smoother output
-                preserveDrawingBuffer	: true	// to allow screenshot
-            });
-            renderer.setClearColorHex( 0xBBBBBB, 1 );
-        }else{
-            renderer	= new THREE.CanvasRenderer();
-        }
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.getElementById('container').appendChild(renderer.domElement);
-
-        // add Stats.js - https://github.com/mrdoob/stats.js
-        stats = new Stats();
-        stats.domElement.style.position	= 'absolute';
-        stats.domElement.style.bottom	= '0px';
-        document.body.appendChild( stats.domElement );
-
-        // create a scene
-        scene = new THREE.Scene();
-
-        // put a camera in the scene
-        camera	= new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.set(0, 0, 5);
-        scene.add(camera);
-
-        // create a camera contol
-        cameraControls	= new THREE.TrackballControls( camera )
-
-        // transparently support window resize
-        THREEx.WindowResize.bind(renderer, camera);
-        // allow 'p' to make screenshot
-        THREEx.Screenshot.bindKey(renderer);
-        // allow 'f' to go fullscreen where this feature is supported
-        if( THREEx.FullScreen.available() ){
-            THREEx.FullScreen.bindKey();
-            document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
-        }
-
-        // here you add your objects
-        // - you will most likely replace this part by your own
-        var light	= new THREE.DirectionalLight( new THREE.Color().setRGB(0.2, 0.2, 0.2) );
-        scene.add( light );
-
-        light	= new THREE.DirectionalLight(new THREE.Color().setRGB(0.1, 0.1, 0.1)  );
-        light.position.set(0, 0, -1);
-        scene.add( light );
-        light	= new THREE.DirectionalLight( new THREE.Color().setRGB(0.2, 0.2, 0.2) );
-        light.position.set(0, 0, 1);
-        scene.add( light );
-
-        light	= new THREE.DirectionalLight(new THREE.Color().setRGB(0.2, 0.2, 0.2)  );
-        light.position.set(0, 1, 0);
-        scene.add( light );
-
-
-        light	= new THREE.DirectionalLight( new THREE.Color().setRGB(0.2, 0.2, 0.2)  );
-        light.position.set( 0,-1,  0);
-        scene.add( light );
-
-        light	= new THREE.DirectionalLight(new THREE.Color().setRGB(0.5, 0.5, 0.5) );
-        light.position.set( 1, 0, 0);
-        scene.add( light );
-
-
-        light	= new THREE.DirectionalLight( new THREE.Color().setRGB(0.1, 0.1, 0.1) );
-        light.position.set(-1,0,  0);
-        scene.add( light );
-
-
-        var geometry =  new THREE.IcosahedronGeometry(1);
-
-        var ss = new THREE.GeoSubDivModifier(5);
-        ss.modify(geometry);
-
-        THREE.GeometryUtils.analyzeNormals(geometry);
-
-        var faceIndices = [ 'a', 'b', 'c', 'd' ];
-
-        var colors = [
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1]
-        ];
-
-        _.each(geometry.faces, function(f, i){
-
-            n = ( f instanceof THREE.Face3 ) ? 3 : 4;
-
-            for( var j = 0; j < n; j++ ) {
-
-                vertexIndex = f[ faceIndices[ j ] ];
-
-                p = geometry.vertices[ vertexIndex ];
-
-                var color = new THREE.Color( 0xffffff );
-                color.setRGB.apply(color, colors[vertexIndex % colors.length]);
-
-                f.vertexColors[ j ] = color;
-
-            }
-
-        });
-
-        var materials = [
-
-            new THREE.MeshLambertMaterial( { color: 0xffffff/2,
-                shading: THREE.FlatShading,
-                vertexColors: THREE.VertexColors } ),
-           new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true,
-                transparent: true } )
-
-        ];
-        var mesh	= THREE.SceneUtils.createMultiMaterialObject( geometry, materials );
-        scene.add( mesh );
-
-    }
-
-    // animation loop
-    function animate() {
-
-        // loop on request animation loop
-        // - it has to be at the begining of the function
-        // - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
-        requestAnimationFrame( animate );
-
-        // do the render
-        render();
-
-        // update stats
-        stats.update();
-    }
-
-    // render the scene
-    function render() {
-        // variable which is increase by Math.PI every seconds - usefull for animation
-        var PIseconds	= Date.now() * Math.PI;
-
-        // update camera controls
-        cameraControls.update();
-
-
-        // actually render the scene
-        renderer.render( scene, camera );
-    }
 </script>
 </body>
 </html>
