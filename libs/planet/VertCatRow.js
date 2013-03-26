@@ -11,6 +11,7 @@ if (typeof module !== 'undefined') {
 
 
 window.VertCatRow = (function () {
+	var _DEBUG = false;
 	function _p(n) {
 		return Math.floor(100 * n);
 	}
@@ -72,11 +73,29 @@ window.VertCatRow = (function () {
 		},
 
 		closest: function(point){
+			if (_DEBUG) console.log('looking for column closest to ', point);
 			var col = _.find(this.cols, function(col){
 				return col.contains(point);
 			});
 
-			return col.closest(point);
+			var out = col.closest(point);
+			if (_DEBUG) console.log('found... ', out);
+			return out;
+		},
+
+		closest_vector: function(point){
+			return this._closest_cat_col(point).closest_vector(point);
+		},
+
+		_closest_cat_col: function(point){
+			return _.reduce(this.cols, function(closest, col){
+				if (!closest){
+					return col.center();
+				}
+
+				return point.closest(col.center(), closest);
+
+			}, null).col;
 		},
 
 		closest_vector: function(point){

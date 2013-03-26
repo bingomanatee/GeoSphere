@@ -77,7 +77,11 @@ window.VertCatCol = (function () {
 		},
 
 		closest: function (point) {
+<<<<<<< HEAD
 			return _.reduce(_.pluck(this.contents_fudge, 'vector'), function (o, p) {
+=======
+			return _.reduce(this.contents_fudge, function (o, p) {
+>>>>>>> work on grey scale /vertex map
 				if (!o) return p;
 
 				return point.closest(o, p);

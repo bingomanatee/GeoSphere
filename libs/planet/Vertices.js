@@ -162,7 +162,11 @@ window.Vertices = (function () {
 			})
 
 			if (!row){
+<<<<<<< HEAD
 				console.log('cannot find row for ', point);
+=======
+				console.log('cannot find closest_row for ', point);
+>>>>>>> work on grey scale /vertex map
 			}
 			return row;
 
