@@ -12,7 +12,7 @@ THREE.Vector2.prototype.toString = function () {
 	)
 };
 
-THREE.Vector2.prototype.closest = function (a, b) {
+THREE.Vector3.prototype.closest = THREE.Vector2.prototype.closest = function (a, b) {
 	var ad = a.distanceToSquared(this);
 	if (!ad) return a;
 	var bd = b.distanceToSquared(this);
@@ -41,8 +41,43 @@ window.VertCatCol = (function () {
 
 	VertCatCol.prototype = {
 
-		closest: function(point){
-			return _.reduce(this.contents_fudge, function(o, p){
+		center: function () {
+			if (!this._center) {
+				this._center = _.reduce(this.contents,
+					function (center, pt) {
+						center.add(pt);
+						return center;
+					}, new THREE.Vector3(0, 0, 0));
+				this._center.divideScalar(this.content.length);
+				this._center.col = this;
+			}
+			return this._center;
+		},
+
+		closest_vector: function (p) {
+			return _.reduce(
+				_.pluck(this.contents_fudge, 'vertex'),
+				function (closest, pt) {
+					if (!closest) { return pt; }
+					return p.closest(pt, closest);
+				}, null);
+		},
+
+		toJSON: function () {
+			function uvf(uv) {
+				return uv.index;
+			}
+
+			return {
+				min_x:          this.min_x,
+				max_x:          this.max_x,
+				contents_fudge: _.map(this.contents_fudge, uvf),
+				contents:       _.map(this.contents, uvf)
+			}
+		},
+
+		closest: function (point) {
+			return _.reduce(_.pluck(this.contents_fudge, 'vector'), function (o, p) {
 				if (!o) return p;
 
 				return point.closest(o, p);
@@ -62,10 +97,10 @@ window.VertCatCol = (function () {
 
 		contains: function (point, fudge) {
 
-				return(
-					(point.x >= this.min_x) &&
-						(point.x < this.max_x));
-			}
+			return(
+				(point.x >= this.min_x) &&
+					(point.x < this.max_x));
+		}
 	};
 
 	return VertCatCol;

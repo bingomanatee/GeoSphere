@@ -56,7 +56,11 @@ window.Vertices = (function () {
 		this.min = new THREE.Vector2(0, 0);
 		this.max = new THREE.Vector2(1, 1);
 
-		this.vertices = iso.vertices.slice(0);
+		this.load_vertices();
+		this.load_neighbors();
+		this.set_value();
+
+
 		this.rows = [];
 		this.categorize(inc);
 	}
@@ -67,6 +71,66 @@ window.Vertices = (function () {
 	 */
 
 	Vertices.prototype = {
+
+		set_value: function(){
+			_.each(this.vertices, function(v){
+				v.grey = Math.random();
+			})
+
+			_.each(this.vertices, function(v){
+				var n_greys = [];
+				_.each(v.neighbors, function(n){
+					var vn = this.vertices[n];
+					n_greys.push(vn.grey);
+				}, this);
+				v.ngrey = _.reduce(n_greys, function(o, grey){
+					return o + grey;
+				}, 0)
+				v.ngrey /= n_greys.length;
+
+			}, this);
+		},
+
+		load_neighbors: function(){
+			_.each(this.iso.faces, function(face){
+				var indexes = [face.a, face.b, face.c];
+
+				_.each(indexes, function(i){
+					_.each(indexes, function(n){
+						if (i != n){
+							var v = this.vertices[i];
+							if (!v.neighbors){
+								v.neighbors = [n];
+							} else {
+								v.neighbors.push(n);
+							}
+						}
+					}, this);
+				}, this);
+			}, this)
+
+			_.each(this.vertices, function(v){
+				v.neighbors = _.uniq(v.neighbors);
+			})
+		},
+
+		toJSON: function(){
+			return {
+				inc: this.inc,
+				iso_vertices: this.vertices.length,
+				rows: _.map(this.rows, function(r){
+					return r.toJSON();
+				})
+			}
+		},
+
+		load_vertices: function(){
+			this.vertices = _.map(this.iso.vertices, function(v, i){
+				v.uv.index = i;
+				v.uv.vertex = v;
+				return v.uv;
+			})
+		},
 
 		categorize: function (inc) {
 			//@TODO: seed poles, edges
@@ -83,34 +147,46 @@ window.Vertices = (function () {
 			if (_DEBUG) console.log('categorizing inc %s; %s rows', inc, this.rows.length);
 		},
 
+		closest_vector: function(point){
+
+			var cc = this.closest_column();
+
+			return cc.closest_vector(point);
+
+		},
+
 		closest_row: function(point){
 
-			var index = Math.floor(1 + point.y / this.inc); // add 1 because we have a "gutter row" outside the bounds
-			index = Math.min(this.rows.length - 1, Math.max(0, index));
-			var row;
-			var i_match = false;
+			var row = _.find(this.rows, function(row){
+				return row.min_y <= point.y && row.max_y > point.y;
+			})
 
-			do {
-
-				row = this.rows[index];
-				if (row.min_y > point.y) {
-					if (_DEBUGSUB){
-						console.log('index: %s, row.min_y (%s) > %s; decrementing', index, row.min_y, point);
-					}
-					--index;
-				} else if (row.max_y < point.y){
-					if (_DEBUGSUB){
-						console.log('index: %s, row.max_y (%s) < %s; incrementing', index,  row.min_y, point);
-					}
-					++index;
-				} else {
-					i_match = true;
-				}
-
-			} while (!i_match);
-
+			if (!row){
+				console.log('cannot find row for ', point);
+			}
 			return row;
 
+		},
+
+		closest_column: function(point){
+			return _.reduce(this.rows, function(closest, row){
+
+				var row_cc = row.closest_column(point);
+				if (!closest) return row_cc;
+
+				var rcc_center = row_cc.center();
+				var closest_center = closest.center();
+
+				if (rcc_center.distanceSq() < closest_center.distanceSq()){
+					return row_cc;
+				} else {
+					return closest;
+				}
+			});
+		},
+
+		closest_x_y: function(x, y){
+			return this.closest(new THREE.Vector2(x, y));
 		},
 
 		closest: function (point, brute_force) {
@@ -128,7 +204,7 @@ window.Vertices = (function () {
 
 			var row = this.closest_row(point);
 
-			if (_DEBUGSUB){
+			if (_DEBUGSUB || 1){
 				console.log('looking for closest in row %s, %s', row.min_y, row.max_y);
 			}
 

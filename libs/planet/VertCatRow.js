@@ -63,6 +63,13 @@ window.VertCatRow = (function () {
 	}
 
 	VertCatRow.prototype = {
+		toJSON: function(){
+			return {
+				min_y: this.min_y,
+				max_y: this.max_y,
+				cols: _.map(this.cols, function(c){ return c.toJSON(); })
+			}
+		},
 
 		closest: function(point){
 			var col = _.find(this.cols, function(col){
@@ -70,6 +77,21 @@ window.VertCatRow = (function () {
 			});
 
 			return col.closest(point);
+		},
+
+		closest_vector: function(point){
+			return this._closest_cat_col(point).closest_vector(point);
+		},
+
+		_closest_cat_col: function(point){
+			return _.reduce(this.cols, function(closest, col){
+				if (!closest){
+					return col.center();
+				}
+
+				return point.closest(col.center(), closest);
+
+			}, null).col;
 		},
 
 		toString: function(){
