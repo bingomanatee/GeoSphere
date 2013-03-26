@@ -72,11 +72,7 @@ function initCanvas(data) {
 
 	image_filter = new PlanetFilter(geometry, width, height);
 	image_filter.update = function () {
-<<<<<<< HEAD
 		console.log('preparing PlanetFilter', Math.round((new Date().getTime() - t) / 1000));
-=======
-		//console.log('preparing PlanetFilter', Math.round((new Date().getTime() - t) / 1000));
->>>>>>> work on grey scale /vertex map
 
 		texCanvas.width = width;
 		texCanvas.height = height;
@@ -85,11 +81,7 @@ function initCanvas(data) {
 
 		var time = new Date().getTime();
 		image_filter.applyFilter(ctx, 0, 0, texCanvas.width, texCanvas.height);
-<<<<<<< HEAD
 		console.log('duration: ', Math.floor((new Date().getTime() - time) / 1000));
-=======
-	//	console.log('duration: ', Math.floor((new Date().getTime() - time) / 1000));
->>>>>>> work on grey scale /vertex map
 	};
 	image_filter.update();
 
