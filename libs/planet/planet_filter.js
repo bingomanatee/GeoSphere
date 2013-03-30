@@ -17,6 +17,20 @@ window.PlanetFilter = (function(){
 
 	var p = PlanetFilter.prototype = new createjs.Filter();
 
+	p.color_point = function(point, r, g, b){
+		function _01(v){
+			if ((!v) || (!isNaN(v))) return 0;
+			return Math.max(0, Math.min(1, v));
+		}
+
+		var vector = this.vertices.closest_vector(point);
+		var index = vector.uv.index;
+
+		this.colors[index].setRGB(_01(r), _01(g), _01(b));
+
+		return [vector, this.colors[index]];
+	};
+
 	p.prepare_vertex_colors = function(){
 
 		this.colors = [];
@@ -48,10 +62,10 @@ window.PlanetFilter = (function(){
 				cp.image_indexes.push(index);
 				this.point_indexes[index] = cp.index;
 			} else {
-				console.log('cannot find closest_x_y', px, py);
+			 //	console.log('cannot find closest_x_y', px, py);
 			}
 		}
-	}
+	};
 
 	/**
 	 * Applies the filter to the specified context.
@@ -66,7 +80,10 @@ window.PlanetFilter = (function(){
 	 * @param {Number} targetY Optional. The y position to draw the result to. Defaults to the value passed to y.
 	 * @return {Boolean}
 	 **/
+	var refilters = 0;
+
 	p.applyFilter = function(ctx, x, y, width, height, targetCtx, targetX, targetY) {
+		var grey;
 		targetCtx = targetCtx || ctx;
 		if (targetX == null) { targetX = x; }
 		if (targetY == null) { targetY = y; }
@@ -84,13 +101,19 @@ window.PlanetFilter = (function(){
 		for (var index=0; index<l; ++index) {
 			var offset = index * 4;
 			var vert_index = this.point_indexes[index];
-			var vert = this.vertices.vertices[vert_index];
-			if (!vert){
-				console.log('cannot find vertex ', vert_index);
-				var grey = 0;
+			if (vert_index == -1){
+				 grey = 0;
 			} else {
-				var grey = vert.ngrey;
+
+				var vert = this.vertices.vertices[vert_index];
+				if (!vert){
+					// console.log('cannot find vertex ', vert_index);
+					 grey = 0;
+				} else {
+					 grey = vert.ngrey;
+				}
 			}
+			
 		//	console.log('point ', point_x, ',', point_y, '; ', px, ',', py, 'closest', cp);
 			data[offset] =  data[offset +1] = data[offset+2] =  Math.floor(grey * 255);
 			data[offset+3] = 255
@@ -98,6 +121,7 @@ window.PlanetFilter = (function(){
 		}
 		imageData.data = data;
 		targetCtx.putImageData(imageData, targetX, targetY);
+		++ refilters;
 		return true;
 	}
 

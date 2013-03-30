@@ -2,6 +2,9 @@ var stats, scene, renderer, composer, geometry;
 var camera, cameraControls, material, stage;
 var planet, texture, texCanvas, image, image_filter;
 
+var scale = 1.5;
+var isoDepth = 4;
+
 function addLights(scene) {
 	var light = new THREE.DirectionalLight(new THREE.Color().setRGB(0.2, 0.2, 0.2));
 	scene.add(light);
@@ -60,7 +63,6 @@ function initRenderer() {
 }
 
 function initCanvas(data) {
-	var scale = 2;
 	var width = 360 * scale;
 	var height = 180 * scale;
 
@@ -68,11 +70,10 @@ function initCanvas(data) {
 	texCanvas = document.createElement('canvas');
 
 	image = new createjs.Bitmap(data.content.image);
-	var t = new Date().getTime();
 
 	image_filter = new PlanetFilter(geometry, width, height);
 	image_filter.update = function () {
-		console.log('preparing PlanetFilter', Math.round((new Date().getTime() - t) / 1000));
+		console.log('preparing PlanetFilter');
 
 		texCanvas.width = width;
 		texCanvas.height = height;
@@ -81,6 +82,7 @@ function initCanvas(data) {
 
 		var time = new Date().getTime();
 		image_filter.applyFilter(ctx, 0, 0, texCanvas.width, texCanvas.height);
+		texture.needsUpdate = true;
 		console.log('duration: ', Math.floor((new Date().getTime() - time) / 1000));
 	};
 	image_filter.update();
@@ -158,7 +160,7 @@ function onLoad(data) {
 			map: content
 
 		}),
-		new THREE.MeshBasicMaterial({ color: 0x000000, shading: THREE.FlatShading, wireframe: true,
+		new THREE.MeshBasicMaterial({ color: 0xffffff * 0.5, shading: THREE.FlatShading, wireframe: true,
 			transparent:                     true })
 
 	];
@@ -169,7 +171,7 @@ function onLoad(data) {
 
 function init() {
 
-	geometry = new THREE.IcosahedronGeometry(1, 6);
+	geometry = new THREE.IcosahedronGeometry(1, isoDepth);
 	console.log('points: ', geometry.vertices.length);
 	geometry.dynamic = true;
 
@@ -214,25 +216,12 @@ function onDocumentMouseDown(event) {
 
 	}
 
-	var cp = image_filter.vertex.closest_point(point);
-	console.log('closest point: ', cp);
+	var colored = image_filter.color_point(point, 0, 0, 0);
+	colored[0].uv.ngrey = colored[0].uv.grey = 0;
 
-	/*
-	 //stage.removeAllChildren();
-
-	 var s = new createjs.Shape();
-	 s.graphics.beginFill('#FFFFFF');
-
-	 _.each(pts, function (p) {
-	 var x = Math.round(p.uv.x * 1000);
-	 var y = 500 - Math.round(p.uv.y * 500);
-	 s.graphics.drawCircle(x, y, 2)
-	 });
-
-	 stage.addChild(s);
-	 stage.update();
-	 texture.needsUpdate = true; */
-
+	console.log('coloring ', colored);
+	image_filter.update();
+	material.needsUpdate = true;
 }
 
 // animation loop

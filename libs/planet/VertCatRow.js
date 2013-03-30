@@ -72,6 +72,12 @@ window.VertCatRow = (function () {
 			}
 		},
 
+		full_cols: function(){
+			return _.filter(this.cols, function(col){
+				return col.contents.length > 0;
+			})
+		},
+
 		closest: function(point){
 			if (_DEBUG) console.log('looking for column closest to ', point);
 			var col = _.find(this.cols, function(col){
@@ -93,22 +99,7 @@ window.VertCatRow = (function () {
 					return col.center();
 				}
 
-				return point.closest(col.center(), closest);
-
-			}, null).col;
-		},
-
-		closest_vector: function(point){
-			return this._closest_cat_col(point).closest_vector(point);
-		},
-
-		_closest_cat_col: function(point){
-			return _.reduce(this.cols, function(closest, col){
-				if (!closest){
-					return col.center();
-				}
-
-				return point.closest(col.center(), closest);
+				return point.closest(col.center_point(), closest);
 
 			}, null).col;
 		},
@@ -148,8 +139,42 @@ window.VertCatRow = (function () {
 		contains: function (point) {
 			return( (point.y >= this.min_y) &&
 				(point.y < this.max_y) );
-		}
+		},
 
+		/** ********************** Vector (3d) methods ********************* */
+
+		/**
+		 * returns the column whose CENTER is closest to the passed in vector
+		 * @param point
+		 * @returns {VertCatCol}
+		 */
+		closest_column_by_vector: function(vector){
+			return _.reduce(this.full_cols(), function(closest, column){
+
+				if (!closest){
+					return column;
+				}
+
+				try {
+
+					var co_center = column.center_vector();
+					var cl_center = closest.center_vector();
+
+					var co_dist = co_center.distanceToSquared(vector);
+					var cl_dist = cl_center.distanceToSquared(vector);
+				} catch(err) {
+					console.log('closest_column_vector error: ', err);
+					throw err;
+				}
+
+				if (co_dist > cl_dist){
+					return closest;
+				} else {
+					return column;
+				}
+
+			}, null);
+		}
 	};
 	return VertCatRow;
 })();

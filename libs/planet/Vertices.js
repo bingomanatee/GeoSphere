@@ -147,13 +147,42 @@ window.Vertices = (function () {
 			if (_DEBUG) console.log('categorizing inc %s; %s rows', inc, this.rows.length);
 		},
 
-		closest_vector: function(point){
+		/** ******************** CLOSEST VECTOR (3d) ********************** */
 
-			var cc = this.closest_column();
-
-			return cc.closest_vector(point);
-
+		/**
+		 * returns the closest 3D vector to the input point
+		 * @param vector {Vector3} a 3D point in space. Does not have to be on the planet...
+		 * @returns {*}
+		 */
+		closest_vector: function(vector){
+			var cc = this.closest_column_vector(vector);
+			return cc.closest_vector(vector);
 		},
+
+		/**
+		 * goes through each row and finds the closest column to the passed in vector.
+		 * Then reduces each rows' closest column to find the column closest to that vector
+		 * @param vector {Vector3} a 3D point in space. Does not have to be on the planet...
+		 * @returns {*}
+		 */
+		closest_column_vector: function(vector){
+			return _.reduce(this.rows, function(closest, row){
+
+				var row_cc = row.closest_column_by_vector(vector);
+				if (!closest) return row_cc;
+
+				var rcc_center = row_cc.center_vector();
+				var closest_center = closest.center_vector();
+
+				if (rcc_center.distanceToSquared(vector) < closest_center.distanceToSquared(vector)){
+					return row_cc;
+				} else {
+					return closest;
+				}
+			}, null);
+		},
+
+		/** ********************** CLOSEST UV ********************** */
 
 		closest_row: function(point){
 
@@ -168,27 +197,27 @@ window.Vertices = (function () {
 
 		},
 
-		closest_column: function(point){
-			return _.reduce(this.rows, function(closest, row){
-
-				var row_cc = row.closest_column(point);
-				if (!closest) return row_cc;
-
-				var rcc_center = row_cc.center();
-				var closest_center = closest.center();
-
-				if (rcc_center.distanceSq() < closest_center.distanceSq()){
-					return row_cc;
-				} else {
-					return closest;
-				}
-			});
-		},
-
+		/**
+		 * a two-argument interface to closest.
+		 *
+		 * @param x: float(0..1)
+		 * @param y: float(0..1)
+		 *
+		 * @returns {Vector2}
+		 */
 		closest_x_y: function(x, y){
 			return this.closest(new THREE.Vector2(x, y));
 		},
 
+		/**
+		 * this gives you the point closest to a Vector2 (UV 0..1, 0..1) coordinate
+		 *
+		 * @param point: Vector2 (UV 0..1, 0..1) a UV coordinate
+		 * @param brute_force: boolean whether to use the bins to find the point fast or
+		 *                     just test EVERY point. Brute force is slightly (< 0.1%) more accurate
+		 *                     but is twice as slow.
+		 * @returns Vector2 - a UV point, with metadata.
+		 */
 		closest: function (point, brute_force) {
 			//@TODO: sanitize poles, edges
 
