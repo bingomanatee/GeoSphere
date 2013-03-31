@@ -2,13 +2,14 @@
 
 window.PlanetFilter = (function(){
 
-	var PlanetFilter = function(iso, width, height){
+	var PlanetFilter = function(iso, width, height, color_scale){
 		var t = new Date().getTime();
 		this.iso = iso;
+		this.color_scale = color_scale;
 
 		this.vertices = new Vertices(iso, 0.02);
-		console.log('vertices creation: ', Math.round((new Date().getTime() - t)/1000));
-		console.log('vertices JSON: ', this.vertices.toJSON());
+	//	console.log('vertices creation: ', Math.round((new Date().getTime() - t)/1000));
+	//	console.log('vertices JSON: ', this.vertices.toJSON());
 
 		this.prepare_vertex_colors();
 
@@ -67,6 +68,40 @@ window.PlanetFilter = (function(){
 		}
 	};
 
+	var refilters = 0;
+
+	function interp(ref1, ref2, grey, index){
+		var v1 = ref1.color[index];
+		var v2 = ref2.color[index];
+		var v1_dist = 1/Math.abs(ref1.grey - grey);
+		var v2_dist = 1/Math.abs(ref2.grey - grey);
+
+		return ((v1 * v1_dist) + (v2 * v2_dist)) / (v1_dist + v2_dist);
+	}
+
+	p.grey_to_color = function(grey){
+
+		if (grey <= 0){
+			return this.color_scale[0].color;
+		} else if (grey >= 1){
+			return _.last(this.color_scale).color;
+		}
+
+		return _.reduce(this.color_scale,
+			function(out, scale){
+				if (!out){
+					return scale;
+				}
+
+				if (scale.grey <= grey && scale.grey > out.grey){
+					return scale;
+				} else {
+					return out;
+				}
+			}
+			, null).color;
+	};
+
 	/**
 	 * Applies the filter to the specified context.
 	 * @method applyFilter
@@ -80,7 +115,6 @@ window.PlanetFilter = (function(){
 	 * @param {Number} targetY Optional. The y position to draw the result to. Defaults to the value passed to y.
 	 * @return {Boolean}
 	 **/
-	var refilters = 0;
 
 	p.applyFilter = function(ctx, x, y, width, height, targetCtx, targetX, targetY) {
 		var grey;
@@ -97,7 +131,6 @@ window.PlanetFilter = (function(){
 		var data = imageData.data;
 		var l = data.length / 4;
 
-
 		for (var index=0; index<l; ++index) {
 			var offset = index * 4;
 			var vert_index = this.point_indexes[index];
@@ -113,9 +146,12 @@ window.PlanetFilter = (function(){
 					 grey = vert.ngrey;
 				}
 			}
-			
-		//	console.log('point ', point_x, ',', point_y, '; ', px, ',', py, 'closest', cp);
-			data[offset] =  data[offset +1] = data[offset+2] =  Math.floor(grey * 255);
+
+			var color = _.map(this.grey_to_color(grey), Math.floor);
+
+			data[offset] = color[0];
+			data[offset +1] = color[1];
+			data[offset+2] =  color[2]
 			data[offset+3] = 255
 
 		}

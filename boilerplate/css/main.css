@@ -37,3 +37,14 @@ body {
     bottom: 2em;
     background-color: red;
 }
+
+#map {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    right: 2em;
+    top: 2em;
+    padding: 0px;
+    background-color: white;
+    opacity: 0.6;
+}

@@ -179,7 +179,7 @@ window.Vertices = (function () {
 				} else {
 					return closest;
 				}
-			}, null);
+			}, null );
 		},
 
 		/** ********************** CLOSEST UV ********************** */
