@@ -6,7 +6,7 @@ var scale = 3;
 var isoDepth = 7;
 var CANVAS_SIZE = 400;
 
-var color_scale = [
+var earth_color_scale = [
 	{grey: 0, color: [0, 0, 0]},
 	{grey: 28/255, color: [0, 0, 75]}, // lightest blue
 	{grey: 31/255, color: [0, 0, 100]}, // swamp/shallow water
@@ -19,6 +19,22 @@ var color_scale = [
 	{grey: 60/255, color: [75, 25, 0]}, // mountains
 	{grey: 65/255, color: [51, 51, 128]}, // mountains
 	{grey: 75/255, color: [255, 255, 255]}, // high mountain
+	{grey: 1, color: [255, 255, 255]} // highest mountain
+];
+
+var color_scale = [
+	{grey: 0, color: [0, 0, 0]},
+	{grey: 28/255, color: [0, 0, 75]}, // lightest blue
+	{grey: 49.5/255, color: [0, 0, 100]}, // swamp/shallow water
+	{grey: 50/255, color: [255, 255, 0]}, // coast
+	{grey: 52/255, color: [51, 125, 25]}, // valley
+	{grey: 75/255, color: [75, 100,15]}, // low hills
+	{grey: 100/255, color: [128,85,0]}, // hills
+	{grey: 120/255, color: [100, 50, 0]}, // high hills
+	{grey: 140/255, color: [75, 25, 75]}, // low mountains
+	{grey: 160/255, color: [75, 25, 0]}, // mountains
+	{grey: 180/255, color: [51, 51, 128]}, // mountains
+	{grey: 200/255, color: [255, 255, 255]}, // high mountain
 	{grey: 1, color: [255, 255, 255]} // highest mountain
 ];
 
@@ -216,7 +232,7 @@ function onLoad(data) {
 	var map_loader = new THREE.TextureLoader();
 	map_loader.crossDomain = true;
 	map_loader.addEventListener('load', onLoadMap);
-	map_loader.load('images/earth.png');
+	map_loader.load('images/MarsHeight.png');
 }
 
 function init() {
