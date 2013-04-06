@@ -59,6 +59,7 @@ window.Vertices = (function () {
 		this.load_vertices();
 		this.load_neighbors();
 		this.set_value();
+		this.set_power();
 
 
 		this.rows = [];
@@ -71,6 +72,19 @@ window.Vertices = (function () {
 	 */
 
 	Vertices.prototype = {
+
+		set_power: function(level){
+			if (!level){
+				level = 1;
+				for (var i = 0; i < 12; ++i){
+					this.vertices[i].power = level;
+				}
+			}
+
+			var points_at_level = _.filter(this.vertices, function(){
+
+			})
+		},
 
 		set_value: function(){
 			_.each(this.vertices, function(v){
