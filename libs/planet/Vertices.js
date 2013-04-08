@@ -246,12 +246,20 @@ window.Vertices = (function () {
 			}
 
 			var row = this.closest_row(point);
+			if (!row) {
+				return this.closest(point, true);
+			}
 
 			if (_DEBUGSUB){
 				console.log('looking for closest in row %s, %s', row.min_y, row.max_y);
 			}
 
-			return row.closest(point);
+			var closest = row.closest(point);
+			if (!closest){
+				return this.closest(point,true);
+			} else {
+				return closest;
+			}
 		}
 	};
 
