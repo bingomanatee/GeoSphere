@@ -4,6 +4,7 @@ if (typeof module !== 'undefined') {
 	var util = require('util');
 	var THREE = require('three');
 	var r = require('./VertCatRow');
+	var ext = require('./THREE.ext');
 	VertCatRow = r.VertCatRow;
 }
 
@@ -23,21 +24,6 @@ window.Vertices = (function () {
 	function _p(n) {
 		return Math.floor(100 * n);
 	}
-
-	THREE.Vector2.prototype.toString = function () {
-		return util.format('(%s, %s)',
-			_p(this.x),
-			_p(this.y)
-		)
-	};
-
-	THREE.Vector2.prototype.closest = function (a, b) {
-		var ad = a.distanceToSquared(this);
-		if (!ad) return a;
-		var bd = b.distanceToSquared(this);
-		if (!bd) return b;
-		return (ad < bd) ? a : b;
-	};
 
 	/**
 	 * Vertexes are collections of points

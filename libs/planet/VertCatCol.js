@@ -5,21 +5,6 @@ if (typeof module !== 'undefined') {
 	var THREE = require('three');
 }
 
-THREE.Vector2.prototype.toString = function () {
-	return util.format('(%s, %s)',
-		_p(this.x),
-		_p(this.y)
-	)
-};
-
-THREE.Vector3.prototype.closest = THREE.Vector2.prototype.closest = function (a, b) {
-	var ad = a.distanceToSquared(this);
-	if (!ad) return a;
-	var bd = b.distanceToSquared(this);
-	if (!bd) return b;
-	return (ad < bd) ? a : b;
-};
-
 window.VertCatCol = (function () {
 
 	function VertCatCol(x, inc, row, root) {
@@ -42,16 +27,22 @@ window.VertCatCol = (function () {
 	VertCatCol.prototype = {
 
 		toJSON: function () {
-			function uvf(uv) {
-				return uv.index;
-			}
 
-			return {
+			var out= {
 				min_x:          this.min_x,
 				max_x:          this.max_x,
-				contents_fudge: _.map(this.contents_fudge, uvf),
-				contents:       _.map(this.contents, uvf)
-			}
+				contents_fudge: _.pluck(this.contents_fudge, 'index'),
+				contents:       _.pluck(this.contents, 'index')
+			};
+
+			out.fudge = _.reduce(out.contents_fudge, function(fudge, value){
+				if (!_.contains(out.contents, value)){
+					fudge.push(value);
+				}
+				return fudge;
+			} ,[]);
+			delete out.contents_fudge;
+			return out;
 		},
 
 		populate: function () {

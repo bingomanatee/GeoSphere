@@ -7,9 +7,12 @@ if (typeof module !== 'undefined') {
 	var document = false;
 	var Stat = require('./Stat').Stat;
 	var humanize = require('humanize');
+	var ext = require('./THREE.ext');
+
 }
 
 var _DEBUG = false;
+var _BENCHMARK = true;
 
 window.Planet = (function () {
 
@@ -58,11 +61,27 @@ window.Planet = (function () {
 	}
 
 	Planet.prototype = {
+
+		toJSON: function(){
+			return {
+				name: this.name,
+				faces: _.map(this.iso.faces, function(face){
+				return [face.a, face.b, face.c]
+			}),
+				uvs: _.map(this.get_uvs(), function(uv){
+					return uv.toJSON();
+				})
+			}
+		},
+
 		index_points: function () {
+			var time = new Date().getTime();
+
 			var increment = 0.1 / this.recursions;
 			increment = Math.max(0.025, increment);
 
-			this.vertices = new Vertices(this.iso, increment);
+			this.index = new Vertices(this.iso, increment);
+			if (_BENCHMARK) console.log('index created in %s', new Date().getTime() - time);
 		},
 
 		load_texture: function (texture) {
@@ -80,7 +99,10 @@ window.Planet = (function () {
 		},
 
 		draw_data: function () {
-			_.each(this.vertices.vertices, function (uv) {
+
+			var time = new Date().getTime();
+
+			_.each(this.index.vertices, function (uv) {
 				var c = new THREE.Color(uv.x, uv.y, 1);
 				var h = c.getHex(c);
 
@@ -90,6 +112,8 @@ window.Planet = (function () {
 				);
 
 			}, this);
+
+			if (_BENCHMARK) console.log('draw_data in %s', new Date().getTime() - time);
 		},
 
 		make_mesh: function (data) {
@@ -113,15 +137,8 @@ window.Planet = (function () {
 			];
 		},
 
-		toJSON: function(){
-			var out = {
-				index: this.vertices.toJSON()
-			};
-			return out;
-		},
-
 		get_uvs: function () {
-			return this.vertices.vertices;
+			return this.index.vertices;
 		},
 
 		get_neighbor_uvs: function(uv){
@@ -131,7 +148,7 @@ window.Planet = (function () {
 		},
 
 		get_uv: function (index) {
-			return this.vertices.vertices[index]
+			return this.index.vertices[index]
 		},
 
 		get_elevation: function (index) {
@@ -214,18 +231,23 @@ window.Planet = (function () {
 		},
 
 		render_data: function (params, cb) {
-			var delay = Math.max(1200, this.resolution * 250 + 500);
+			var time = new Date().getTime();
+
 			if (params.render_basis == 'node') {
 				var canvas = this.render_node_canvas_data(params);
 				if (params.file) {
 					var fs = require('fs');
 					var canvasBuffer = canvas.toBuffer();
 					fs.writeFileSync(params.file, canvasBuffer);
+					if (_BENCHMARK) console.log('render_data/node in %s ms', new Date().getTime() - time);
 					if (cb) cb();
 				}
 			} else {
-				return this.render_dom_canvas_data(params);
+				var out = this.render_dom_canvas_data(params);
+				if (_BENCHMARK) console.log('render_data/dom in %s ms', new Date().getTime() - time);
 			}
+
+			return out;
 		},
 
 		uv_to_xy: function (uv, w, h) {
@@ -258,129 +280,10 @@ window.Planet = (function () {
 			var canvas = new Canvas(w, h);
 			var ctx = canvas.getContext('2d');
 
-			/*
-			console.log('rendering a canvas as %s, %s', params.width, params.height);
-			var planet = this;
-			var base =  0.5 + Math.sqrt(this.recursions);
-
-			function average_distance(uv) {
-				var distances = _.map(uv.neighbors, function (neighbor) {
-					var n_uv = this.get_uv(neighbor);
-					var distance = this.uv_distance(uv, n_uv, w, h);
-					if (_DEBUG) console.log('distance from %s to %s/ %s: ..... %s', uv, neighbor, n_uv, humanize.numberFormat(distance, 2));
-					return distance;
-				}, planet);
-				if (_DEBUG) console.log('raw distances: ', _.map(distances,function (d) { return humanize.numberFormat(d, 2) }).join(', '));
-				distances = Stat.qa(distances);
-				if (_DEBUG) console.log('q distances: ', _.map(distances,function (d) { return humanize.numberFormat(d, 2)}).join(', '));
-				return Stat.mean(distances);
-			}
-
-			ctx.fillStyle = 'red';
-			ctx.beginPath();
-
-			var centerX = canvas.width / 2;
-			var centerY = canvas.height / 2;
-			var radius = 70;
-
-			ctx.fillStyle = 'rgb(128,128,128)';
-			ctx.beginPath()
-			ctx.rect(-1, -1, canvas.width + 2, canvas.height + 2);
-			ctx.closePath();
-			ctx.fill();
-
-			function _arcs(x, y, distance) {
-
-				_.each([x, x - canvas.width, x + canvas.width], function (cx) {
-					_.each([y, y - canvas.height, y + canvas.height ], function (cy) {
-						ctx.beginPath();
-						ctx.arc(cx, cy, distance, 0, Math.PI * 2);
-						ctx.closePath();
-						ctx.fill();
-					})
-				});
-			}
-
-			_.each(this.get_uvs(), function (uv) {
-				uv.draw_center = this.uv_to_xy(uv, w, h);
-				uv.draw_distance =  average_distance(uv, w, h);
-				uv.draw_color = params.color_map(uv);
-			}, this);
-
-			var draw_distances = _.pluck(this.get_uvs(), 'draw_distance');
-			var qadd = Stat.qa(draw_distances);
-			var max_distance = Stat.mean(qadd) + Stat.stdev(qadd);
-
-			_.each(this.get_uvs(), function(uv){
-				uv.draw_distance = Math.min(max_distance, uv.draw_distance);
-			});
-
-			/**
-			 * draw midpoints
-			 *
-
-			_.each(this.get_uvs(), function (uv) {
-				var center = uv.draw_center;
-				var distance = uv.draw_distance / base;
-				var color = uv.draw_color;
-
-				_.each(this.get_neighbor_uvs(uv), function(n_uv){
-					var center = uv.clone().add(n_uv).divideScalar(2);
-					var midpoint = this.uv_to_xy(center, w, h);
-				//	console.log('n_uv: %s', util.inspect(n_uv));
-
-					midpoint.elevation_normalized = (
-						uv.elevation_normalized + n_uv.elevation_normalized )/2;
-					var color = params.color_map(midpoint);
-					if (false) console.log('drawing midpoint %s, %s, color: %s', midpoint.x, midpoint.y, util.inspect(color));
-					ctx.fillStyle  = util.format('rgba(%s, %s, %s,, 1)',
-						Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2]));
-					_arcs(midpoint.x, midpoint.y, distance);
-				}, this);
-			}, this);
-
-
-			if (false) _.each(this.get_uvs(), function (uv) {
-				var center = uv.draw_center;
-				var distance = uv.draw_distance;
-				var color = uv.draw_color;
-
-				ctx.fillStyle  = util.format('rgba(%s, %s, %s, 0.5)',
-					Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2]));
-
-				_arcs(center.x, center.y, distance / Math.sqrt(Math.sqrt(base)));
-			}, this);
-
-			if (false) _.each(this.get_uvs(), function (uv) {
-				var center = uv.draw_center;
-				var distance = uv.draw_distance;
-				var color = uv.draw_color;
-				ctx.fillStyle  = util.format('rgba(%s,%s,%s,0.6)', Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2]));
-				_arcs(center.x, center.y, distance / Math.sqrt(base));
-			}, this);
-
-			/**
-			 * darkest, center discs
-			 *
-			_.each(this.get_uvs(), function (uv) {
-				var center = uv.draw_center;
-				var distance = uv.draw_distance;
-				var color = uv.draw_color;
-				ctx.fillStyle  = util.format('rgba(%s,%s,%s,1)', Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2]));
-				_arcs(center.x, center.y, distance / base);
-			}, this);
-
-			// clean up draw data
-			_.each(this.get_uvs(), function(uv){
-				delete uv.draw_center;
-				delete uv.draw_distance;
-				delete uv.draw_color;
-			}); */
-
 			_.each(_.range(0, w), function(x){
 				_.each(_.range(0, h), function(y){
 					var uv = new THREE.Vector2(x / w, y/h);
-					var close_uv = this.vertices.closest(uv);
+					var close_uv = this.index.closest(uv);
 					var color = close_uv.draw_color;
 
 					ctx.fillStyle  = util.format('rgba(%s, %s, %s,, 1)',
