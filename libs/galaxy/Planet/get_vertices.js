@@ -39,3 +39,8 @@ GALAXY._prototypes.Planet.get_vertices = function (indexes) {
 	}
 
 };
+
+
+GALAXY._prototypes.Planet.get_vertex = function(index){
+	return this.iso.vertices[index];
+};

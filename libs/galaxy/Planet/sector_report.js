@@ -37,5 +37,14 @@ GALAXY._prototypes.Planet.sector_report = function () {
 };
 
 GALAXY._prototypes.Planet.get_sectors = function () {
-	return _.flatten(_.map(this.sector_tree, function (s) { return s.heritage(); }));
+	function sectors(target){
+		if(_.isArray(target)){
+			return _.map(target, sectors);
+		} else if (target.children){
+			return [target].concat(sectors(target.children));
+		} else {
+			return [target];
+		}
+	}
+	return _.flatten(sectors(this.sector_tree));
 };

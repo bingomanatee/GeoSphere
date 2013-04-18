@@ -24,7 +24,7 @@ function correctUV(uv, vector, azimuth) {
 
 }
 
-	// Angle around the Y axis, counter-clockwise when looking from above.
+// Angle around the Y axis, counter-clockwise when looking from above.
 
 THREE.vector_azimuth = function (vector) {
 	return Math.atan2(vector.z, -vector.x);
@@ -35,7 +35,7 @@ THREE.vector_azimuth = function (vector) {
 THREE.vector_inclination = function (vector) {
 	return Math.atan2(-vector.y, Math.sqrt(( vector.x * vector.x ) + ( vector.z * vector.z )));
 }
-	// Project vector onto sphere's surface
+// Project vector onto sphere's surface
 
 THREE.spherical_vector = function (vector, list) {
 
@@ -51,38 +51,9 @@ THREE.spherical_vector = function (vector, list) {
 	return vertex;
 };
 
-THREE.lat_lon_to_vector =function(lat, lon, not_radian){
-
-	if (not_radian ){
-		/**
-		 * lat, lon is 0..1
-		 */
-	} else {
-		lat /=(2 * Math.PI);
-		lon /= Math.PI
-	}
-
-
-	var cos = Math.cos;
-	var atan = Math.atan;
-	var sin = Math.sin;
-	var tan = Math.tan;
-	var radius = 1;
-
-	var r = radius
-	x = r* cos(lon) * sin(lat)
-	y = r* sin(lon) * sin(lat)
-	z = r * cos(lat)
-	return new THREE.Vector3(x, y, z).normalize();
-
-};
-
 THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 
 	THREE.Geometry.call(this);
-	this._sectors = _.map(faces, function (sector) {
-		return _.sortBy(sector, _.identity);
-	})
 
 	radius = radius || 1;
 	detail = detail || 0;
@@ -99,15 +70,13 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 			that.vertices
 		);
 		vector.detail = detail;
-		vector.sectors = [];
-
 	}
 
 	var midpoints = [], p = this.vertices;
 
 	for (var i = 0, l = faces.length; i < l; i++) {
 
-		make(p[ faces[ i ][ 0 ] ], p[ faces[ i ][ 1 ] ], p[ faces[ i ][ 2 ] ], detail, null);
+		make(p[ faces[ i ][ 0 ] ], p[ faces[ i ][ 1 ] ], p[ faces[ i ][ 2 ] ], detail, -1);
 
 	}
 
@@ -121,10 +90,18 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 
 	}
 
-
 	// Approximate a curved face with recursively sub-divided triangles.
 
 	function make(v1, v2, v3, detail, parent_sector) {
+
+		var sector_id = that.sectors.length;
+		var sector = {
+			vertices: [v1.index, v2.index, v3.index],
+			detail:   detail,
+			id:       sector_id,
+			parent:   parent_sector
+		};
+		that.sectors.push(sector);
 
 		if (detail < 1) {
 
@@ -144,19 +121,6 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 		} else {
 
 			detail -= 1;
-
-			// split triangle into 4 smaller triangles
-			var sector = _.sortBy([v1.index, v2.index, v3.index], _.identity).join(',') + ':' + detail;
-
-			if (!_.isNull(parent_sector)) {
-				//sector = that.sectors[parent_sector][0] + '>>' + sector;
-			}
-
-			var sector_id = that.sectors.length;
-			that.sectors.push([sector, sector_id , parent_sector]);
-			v1.sectors.push(sector_id);
-			v3.sectors.push(sector_id);
-			v2.sectors.push(sector_id);
 
 			make(v1,
 				midpoint(v1, v2, detail, sector_id),
@@ -216,9 +180,10 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 		if (!mid.sectors) {
 			mid.sectors = [];
 		}
-
-		mid.sectors.push(sector);
-		mid.sectors = _.uniq(mid.sectors);
+		if (detail == 0) {
+			mid.sectors.push(sector);
+			mid.sectors = _.uniq(mid.sectors);
+		}
 
 		return mid;
 

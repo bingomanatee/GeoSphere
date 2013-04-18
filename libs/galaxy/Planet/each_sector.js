@@ -23,18 +23,27 @@ if (!GALAXY._prototypes.Planet) {
 	GALAXY._prototypes.Planet = {};
 }
 
-GALAXY._prototypes.Planet.qualify_sectors = function () {
-	var max_depth = 0;
-	if (_DEBUG) console.log('qualify sectors...')
+/**
+ * The load function
+ *
+ * @param id: {String | ObjectId}
+ * @param cb: {function}
+ */
 
-	this.each_sector(function (sector) {
-		if (_DEBUG) 	console.log('qualifying depth of %s', sector.name);
-		sector.depth = sector.ancestors().length;
-		max_depth = Math.max(sector.depth, max_depth);
-	});
+GALAXY._prototypes.Planet.each_sector = function (fn, deep, map) {
+	if (deep) {
+		var sectors = this.get_sectors();
+		if (map) {
 
-	this.each_sector(function (sector) {
-		sector.desc_gens = max_depth - sector.depth;
-	})
-	if (_DEBUG) console.log('done qualifying sectors');
+			return _.map(sectors, fn, this);
+		} else {
+			sectors.forEach(fn, this);
+		}
+	} else {
+		if (map){
+			return _.map(this.sector_tree, fn, this);
+		} else {
+			this.sector_tree.forEach(fn, this);
+		}
+	}
 };
