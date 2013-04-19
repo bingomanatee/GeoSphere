@@ -29,27 +29,19 @@ if (!GALAXY._prototypes.Sector) {
  */
 
 GALAXY._prototypes.Sector.get_center = function () {
-	if (!this._center) {
-		var verts;
-
-		if (this.children && this.children.length) {
-			verts = _.map(this.children, function (child) {
-				return child.get_center();
-			})
-		} else {
-			verts = this.get_vertices();
-		}
+	if (!this.center) {
+		var verts = this.planet.get_vertices(this.vertices);
 
 		if (verts && verts.length){
-			this._center = _.reduce(verts, function(c, v){
+			this.center = _.reduce(verts, function(c, v){
 				return c.add(v);
 			} , new THREE.Vector3(0,0,0));
-			this._center.divideScalar(verts.length);
+			this.center.divideScalar(verts.length);
 		} else {
-			this._center = new THREE.Vector(0,0,0);
+			this.center = new THREE.Vector(0,0,0);
 		}
-		this._center = THREE.spherical_vector(this._center);
+		this.center = THREE.spherical_vector(this.center);
 	}
-	return this._center;
+	return this.center;
 
 };

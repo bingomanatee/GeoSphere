@@ -3,18 +3,21 @@
  */
 if (typeof module !== 'undefined') {
 	var GALAXY = require('./../GALAXY');
-	var Sector = require('./../Sector');
-	var mongoose = require('mongoose');
 	var _ = require('underscore');
 	var util = require('util');
 	var _DEBUG = false;
+	var humanize = require('humanize');
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};
 	}
 	var GALAXY = window.GALAXY;
+	var _DEBUG = window._DEBUG || false;
 }
 
+if (!GALAXY.util) {
+	GALAXY.util = {};
+}
 if (!GALAXY._prototypes) {
 	GALAXY._prototypes = {};
 }
@@ -24,78 +27,55 @@ if (!GALAXY._prototypes.Planet) {
 }
 
 /**
- * The load function
+ * sets the children of sectors
  *
- * @param id: {String | ObjectId}
- * @param cb: {function}
+ * @param point
  */
-
-GALAXY._prototypes.Planet.make_index =	function () {
-		var time = new Date().getTime();
-		var self = this;
-		self._index = {};
-
-		function sector_vertices(index){
-			return _.pluck(_.filter(self.iso.vertices, function(v){
-				return _.contains(v.sectors, index);
-			}), 'index')
+GALAXY._prototypes.Planet.index_sectors = function () {
+	this.sectors.forEach(function (s) {
+		s.get_center();
+		s.children = [];
+		s.children_at = [];
+		s.vertices_at = [];
+		s.vertices_at[s.detail] = s.vertices.slice();
+		for (var i = 0; i < s.detail; ++i) {
+			s.vertices_at[i] = [];
+			s.children_at[i] = [];
 		}
+	});
 
-		function sector_children(index){
-			var child_sectors =  _.filter(self.iso.sectors, function(s){
-				return index == s[2];
-			});
+	var planet = this;
+	this.sectors.forEach(function (s) {
+		if (s.parent > -1) {
+			var parent = planet.sectors[s.parent];
+			parent.children.push(s);
 
-			if (child_sectors && child_sectors.length){
-				_.each(child_sectors, function(sector){
-					sector[3] = sector_children(sector[1]);
-				});
-			} else {
-				self.iso.sectors[index][4] = sector_vertices(index);
+			while (parent) {
+				var vat = parent.vertices_at[s.detail];
+				vat.push.apply(vat, s.vertices);
+
+				parent.children_at[s.detail].push(s);
+				if (parent.parent == -1) {
+					parent = false;
+				} else {
+					parent = planet.sectors[parent.parent];
+				}
 			}
-
-			return child_sectors;
 		}
 
-		var top_sectors = _.filter(self.iso.sectors, function(s){
-			return _.isNull(s[2]);
+	}, this);
+
+	this.sectors.forEach(function (s) {
+		s.vertices_at = _.map(s.vertices_at, function (verts) {
+			return _.map(_.uniq(verts), function(index){
+				return planet.vertices[index];
+			})
+		})
+	})
+
+	this.sectors_by_detail = _.sortBy(
+		_.values(_.groupBy(this.sectors, 'detail')),
+		function (vs) {
+			return vs[0].detail;
 		});
-
-		_.each(top_sectors, function(sector){
-			sector[3] = sector_children(sector[1]);
-		}, self);
-
-		var self = this;
-		function a_to_o(sector){
-
-			// self, id, name, depth
-			var out = new GALAXY.Sector(self, sector[1], sector[0], parseInt(sector[0].split(':')[1]));
-			out.is_top_sector = true;
-
-			if (sector[3] && sector[3].length){
-				out.add_children( _.map(sector[3], a_to_o), self);
-			}
-
-			if (sector[4]){
-				out.vertices = sector[4]
-			}
-
-			out.get_vertices();
-			out.each(function(sector){
-				sector.center = sector.get_center();
-				sector.planet = self;
-			});
-
-			return out;
-		}
-
-		delete self.iso.sectors;
-		this.sector_tree = _.map(top_sectors, a_to_o);
-		if (_DEBUG) this.get_sectors().forEach(function(s){
-			console.log('sector: %s', util.inspect(s.report()));
-		});
-
-
-		if (_DEBUG ) console.log('index made: %s ms', new Date().getTime() - time);
-
-	}
+};

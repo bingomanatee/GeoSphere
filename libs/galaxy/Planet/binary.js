@@ -204,7 +204,10 @@ GALAXY._prototypes.Planet.load_vertices_binary = function (file_path, cb) {
 			}
 		}
 	});
-	handle.on('close', cb);
+	handle.on('close', function(){
+		console.log('vertices: %s', planet.vertices.length);
+		cb();
+	});
 };
 
 GALAXY._prototypes.Planet.load_sectors_binary = function (file_path, cb) {
@@ -215,14 +218,16 @@ GALAXY._prototypes.Planet.load_sectors_binary = function (file_path, cb) {
 
 	var num_buffer = [];
 	planet.sectors = [];
+	planet.sectors_by_detail = [];
 
-	function array_to_sector(a, b, c, depth, id, parent) {
-		return {
+	function array_to_sector(a, b, c, detail, id, parent) {
+		var data = {
 			vertices: [a, b, c],
-			detail:    depth,
+			detail:    detail,
 			id:       id,
 			parent:   parent
-		}
+		};
+		return new GALAXY.Sector(planet, data);
 	};
 
 	handle.on('data', function (buffer) {
@@ -232,12 +237,21 @@ GALAXY._prototypes.Planet.load_sectors_binary = function (file_path, cb) {
 			index += 4;
 
 			if (num_buffer.length == 6) {
-				planet.sectors.push(array_to_sector.apply(null, num_buffer));
+				var sector = array_to_sector.apply(null, num_buffer);
+				planet.sectors.push(sector);
+				if (!planet.sectors_by_detail[sector.detail]){
+					planet.sectors_by_detail[sector.detail] = [sector];
+				} else {
+					planet.sectors_by_detail[sector.detail].push(sector)
+				}
 				num_buffer = [];
 			}
 		}
 	});
-	handle.on('close', cb);
+	handle.on('close', function(){
+		console.log('%s sectors ', planet.sectors.length);
+		cb();
+	});
 
 };
 
@@ -248,7 +262,7 @@ GALAXY._prototypes.Planet.load_binary = function (sector_path, vertices_path, cb
 	var tasks = 0;
 	this.load_sectors_binary(sector_path, function () {
 		self.sectors.forEach(function (sector) {
-			if (sector.depth == 0) {
+			if (sector.detail == 0) {
 				self.iso.faces.push(new THREE.Face3(sector.vertices.a, sector.vertices.b, sector.vertices.c));
 			}
 		})

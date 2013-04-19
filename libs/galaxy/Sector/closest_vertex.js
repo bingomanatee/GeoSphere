@@ -6,6 +6,7 @@ if (typeof module !== 'undefined') {
 	var THREE = require('three');
 	var _ = require('underscore');
 	var util = require('util');
+	var _DEBUG = true;
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};
@@ -21,57 +22,40 @@ if (!GALAXY._prototypes.Sector) {
 	GALAXY._prototypes.Sector = {};
 }
 
-/**
- * return the sector whose center is closest to the passed-in point
- * @param point {Vector3}
- */
-GALAXY._prototypes.Sector.closest_child_sector = function (point) {
-
-	var last_square_distance;
-	var closest;
-	this.children.forEach(function(child){
-		if (!closest){
-			closest = child;
+GALAXY.util.closest_vertex = function (point, list) {
+	var closest, distance, closest_distance;
+	var val = list.length;
+	for (var vi = 0; vi < val; ++vi) {
+		var vertex = list[vi];
+		if (!closest) {
+			closest = vertex;
+			closest_distance = closest.distanceToSquared(point);
 		} else {
-			var distance = child.center.distanceToSquared(point);
-			if (distance < last_square_distance){
-				last_square_distance = distance;
-				closest = child;
+			distance = vertex.distanceToSquared(point);
+			if (distance < closest_distance) {
+				closest_distance = distance;
+				closest = vertex;
 			}
 		}
-	});
+	}
+
 	return closest;
 };
-/**
- * return the sector whose center is closest to the passed-in point
- * @param point {Vector3}
- */
-GALAXY._prototypes.Sector.closest_sector_vertex = function (point) {
 
-	return _.reduce(this.get_vertices(), function (last, vertex) {
-		if (!last){
-			return vertex;
-		} else if (last.distanceToSquared(point) < vertex.distanceToSquared(point)){
-			return last;
-		} else {
-			return vertex;
-		}
-
-	}, null, this);
-};
-
-/**
- * returns the closest vertex to the passed in point
- * @param point
- * @returns {Vector3}
- */
-
-GALAXY._prototypes.Sector.closest_vertex = function (point) {
-	if (this.children && this.children.length) {
-		return this.closest_child_sector(point).closest_vertex(point);
-	} else if (this.vertices && this.vertices.length) {
-		return this.closest_sector_vertex(point);
-	} else {
-		throw new Error('WTF?');
+GALAXY._prototypes.Sector.closest_vertex = function (point, spread, min_depth) {
+	if (!min_depth){
+		min_depth = 0;
 	}
+
+	if (this.detail == min_depth) {
+		return GALAXY.util.closest_vertex(point, this.vertices_at[min_depth])
+	} else {
+		var closest_sectors = GALAXY.util.near_sectors(this.children, point, spread, true);
+		var vectors = _.map(closest_sectors, function(sector){
+			return sector.closest_vertex(point, spread, min_depth);
+		})
+
+		return GALAXY.util.closest_vertex(point, vectors);
+	}
+
 };

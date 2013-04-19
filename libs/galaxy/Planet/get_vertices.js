@@ -20,26 +20,22 @@ if (!GALAXY._prototypes.Planet) {
 }
 
 /**
- * The load function
- *
- * @param id: {String | ObjectId}
- * @param cb: {function}
+ * returns vertices by their IDs.
+ * @param indexes [int]
+ * @returns {*}
  */
 
 GALAXY._prototypes.Planet.get_vertices = function (indexes) {
 
-	var vertices = this.iso.vertices;
-
 	if (indexes){
 		return _.map(indexes, function(index){
-			return vertices[index];
-		});
+			return this.iso.vertices[index];
+		}, this);
 	} else {
-		return vertices;
+		return this.iso.vertices.slice(0);
 	}
 
 };
-
 
 GALAXY._prototypes.Planet.get_vertex = function(index){
 	return this.iso.vertices[index];

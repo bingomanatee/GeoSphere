@@ -16,11 +16,12 @@ if (typeof module !== 'undefined') {
 
 GALAXY.Sector = (function () {
 
-	function Sector(planet, id, name, depth) {
+	function Sector(planet, params) {
 		this.planet = planet;
-		this.id = id;
-		this.name = name;
-		this.depth = depth;
+		this.vertices = params.vertices;
+		this.detail = params.detail;
+		this.id = params.id;
+		this.parent = params.parent;
 	}
 
 	Sector.prototype = GALAXY._prototypes.Sector;

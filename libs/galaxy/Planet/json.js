@@ -22,10 +22,9 @@ if (!GALAXY._prototypes.Planet) {
 	GALAXY._prototypes.Planet = {};
 }
 
-
 GALAXY._prototypes.Planet.save_JSON = function (file_path, cb, nesting) {
 	var data = JSON.stringify(this.toJSON(), nesting, nesting);
-	fs.writeFile( file_path, data, function(){
+	fs.writeFile(file_path, data, function () {
 		console.log('done writing %s', file_path);
 		cb();
 	});
@@ -40,23 +39,18 @@ GALAXY._prototypes.Planet.toJSON = function () {
 	debugger;
 	return {
 		iso:     this.iso_to_JSON(),
-	//	sectors: this.sector_to_JSON(),
-		sector_defs: _.map(this.iso.vertices, function(v, i){
-			return this.sector_data(i);
-		}, this)
-	}
+		sectors: this.iso.sectors
+	};
 };
 
 GALAXY._prototypes.Planet.sector_to_JSON = function () {
-	var sectors =  this.each_sector(function (sector) {
+	var sectors = this.sectors.forEach(function (sector) {
 		return {
 			id:       sector.id,
-			name:     sector.name,
 			vertices: sector.vertices,
-			parent: sector.parent
+			parent:   sector.parent
 		};
-	}, true, true);
-	console.log('sectors: %s', sectors.length);
+	});
 	return sectors;
 };
 
