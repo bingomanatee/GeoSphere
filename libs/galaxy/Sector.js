@@ -5,6 +5,7 @@
 if (typeof module !== 'undefined') {
 	var GALAXY = require('./GALAXY');
 	require('./Sector/index');
+	require('./util/index');
 } else {
 	if (!window.GALAXY) window.GALAXY = {};
 	var GALAXY = window.GALAXY;
