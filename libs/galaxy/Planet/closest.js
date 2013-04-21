@@ -27,12 +27,12 @@ if (!GALAXY._prototypes.Planet) {
 }
 
 /**
- * Finds the vector closest to a given vertex.
+ * Finds the vector whose UV is closest to the input uv point.
  * The vertex does not have to be on the planet, but cannot be (0,0,0);
  *
  * @param point
  */
-GALAXY._prototypes.Planet.closest_uv = function (point, finest_detail, spread) {
+GALAXY._prototypes.Planet.closest_uv = function (uv, finest_detail, spread) {
 	if (!finest_detail){
 		finest_detail = 0;
 	}
@@ -40,12 +40,13 @@ GALAXY._prototypes.Planet.closest_uv = function (point, finest_detail, spread) {
 		spread = 0.05;
 	}
 
-	var closest_sectors = this.closest_top_sectors_uv(point, spread, finest_detail);
-	var closest_vertexes = _.map(closest_sectors, function(sector){
-		return sector.closest_uv(point, spread);
-	})
+	var closest_top_sectors = this.closest_top_sectors_uv(uv, spread, finest_detail);
+	//console.log('closest sectors: %s (%s items)', closest_top_sectors, closest_top_sectors.length);
+	var closest_vertexes = _.map(closest_top_sectors, function(sector){
+		return sector.closest_uv(uv, spread);
+	});
 
-	return GALAXY.util.closest_vertex(point, closest_vertexes);
+	return GALAXY.util.closest_uv(uv, closest_vertexes);
 };
 
 GALAXY._prototypes.Planet.closest_vertex = function (point, finest_detail, spread) {
@@ -56,8 +57,8 @@ GALAXY._prototypes.Planet.closest_vertex = function (point, finest_detail, sprea
 		spread = 0.05;
 	}
 
-	var closest_sectors = this.closest_top_sectors(point, spread);
-	var closest_vertexes = _.map(closest_sectors, function(sector){
+	var closest_top_sectors = this.closest_top_sectors(point, spread);
+	var closest_vertexes = _.map(closest_top_sectors, function(sector){
 		return sector.closest_vertex(point, spread, finest_detail);
 	})
 
@@ -72,12 +73,12 @@ GALAXY._prototypes.Planet.closest_sector = function (point, finest_detail, sprea
 		spread = 0.05;
 	}
 
-	var closest_sectors = this.closest_top_sectors(point, spread);
-	 closest_sectors = _.map(closest_sectors, function(sector){
+	var closest_top_sectors = this.closest_top_sectors(point, spread);
+	var closest_sectors = _.map(closest_top_sectors, function(sector){
 		return sector.closest_sector(point, spread, finest_detail);
 	});
 
-	return GALAXY.util.closest_vertex(point, closest_vertexes);
+	return GALAXY.util.closest_sector(point, closest_sectors);
 };
 
 GALAXY.util.near_sectors = function (sectors, point, spread, skipRange) {

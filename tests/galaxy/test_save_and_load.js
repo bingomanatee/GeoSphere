@@ -89,58 +89,59 @@ describe('GALAXY.Planet', function () {
 		_.range(0, 8).forEach(function (depth) {
 
 			describe('load ' + depth, function () {
-		before(function () {
+				before(function () {
 
-			planet = new Planet();
-			planet.init_iso(depth);
+					planet = new Planet();
+					planet.init_iso(depth);
 
-			sector_path = path.resolve(JSON_ROOT, util.format('planet_depth_%s_sectors.bin', depth));
-			vector_path = path.resolve(JSON_ROOT, util.format('planet_depth_%s_iso.bin', depth));
+					sector_path = path.resolve(JSON_ROOT, util.format('planet_depth_%s_sectors.bin', depth));
+					vector_path = path.resolve(JSON_ROOT, util.format('planet_depth_%s_iso.bin', depth));
 
-		})
+				})
 
-		it('should be able to load sectors', function (done) {
-			planet.load_sectors_binary(sector_path, function () {
-				planet.sectors.length.should.eql(planet.iso.sectors.length);
-				planet.sectors.forEach(function(sector, i){
-					var ps = planet.iso.sectors[i];
-					delete ps.planet;
-					delete sector.planet;
-					try {
+				it('should be able to load sectors', function (done) {
+					planet.load_sectors_binary(sector_path, function () {
+						planet.sectors.length.should.eql(planet.iso.sectors.length);
+						planet.sectors.forEach(function (sector, i) {
+							var ps = planet.iso.sectors[i];
+							delete ps.planet;
+							delete sector.planet;
+							try {
 
-						sector.id.should.eql(ps.id);
-						sector.parent.should.eql(ps.parent);
-						sector.detail.should.eql(ps.detail);
-						sector.vertices.should.eql(ps.vertices);
-					} catch (err){
-						console.log('sector mismatch: %s', util.inspect(sector), util.inspect(ps));
-						console.log(err);
-					};
-				});
+								sector.id.should.eql(ps.id);
+								sector.parent.should.eql(ps.parent);
+								sector.detail.should.eql(ps.detail);
+								sector.vertices.should.eql(ps.vertices);
+							} catch (err) {
+								console.log('sector mismatch: %s', util.inspect(sector), util.inspect(ps));
+								console.log(err);
+							}
+							;
+						});
 
-				planet.sectors_by_detail.forEach(function(sectors, detail){
-					console.log('detail: %s, sectors: %s', detail, sectors.length);
-				});
-				done();
-			})
-		})
+						planet.sectors_by_detail.forEach(function (sectors, detail) {
+							console.log('detail: %s, sectors: %s', detail, sectors.length);
+						});
+						done();
+					})
+				})
 
-		it('should be able to load vertices', function (done) {
-			planet.load_vertices_binary(vector_path, function () {
-			//	console.log('sectors: %s', util.format(planet.sectors));
+				it('should be able to load vertices', function (done) {
+					planet.load_vertices_binary(vector_path, function () {
+						//	console.log('sectors: %s', util.format(planet.sectors));
 
-				planet.vertices.length.should.eql(planet.iso.vertices.length);
-				planet.vertices.forEach(function (vertex, i) {
-					var iv = planet.iso.vertices[i];
-					//console.log('vertex: %s, iso_vertex %s', vertex, iv);
-					var distance = iv.distanceTo(vertex);
-				//	console.log('distance: %s', humanize.numberFormat(distance, 10));
-					distance.should.be.below(0.00001);
+						planet.vertices.length.should.eql(planet.iso.vertices.length);
+						planet.vertices.forEach(function (vertex, i) {
+							var iv = planet.iso.vertices[i];
+							//console.log('vertex: %s, iso_vertex %s', vertex, iv);
+							var distance = iv.distanceTo(vertex);
+							//	console.log('distance: %s', humanize.numberFormat(distance, 10));
+							distance.should.be.below(0.00001);
 
-				});
-				done();
-			})
-		})
+						});
+						done();
+					})
+				})
 			})
 		})
 

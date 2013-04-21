@@ -6,14 +6,18 @@ if (typeof module !== 'undefined') {
 }
 
 function _p(n) {
-	return Math.floor(100 * n);
+	return humanize.numberFormat(100 * n, 5);
 }
 
 function _n(n){
 	return humanize ? humanize.numberFormat(n, 4) : n;
 }
 
-THREE.Vector3.prototype.toString = function () {
+THREE.Vector3.prototype.toString = function (uv) {
+	if (this.uv && uv){
+		return this.toString() + ':uv' + this.uv.toString();
+	}
+
 	return '(' + [
 		_n(this.x),
 		_n(this.y),

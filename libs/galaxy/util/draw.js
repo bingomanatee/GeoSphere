@@ -27,6 +27,11 @@ GALAXY.util.alpha = function(value){
 	return Math.max(0, Math.min(1, value));
 };
 
+GALAXY.util.draw = function(width, height, pt_to_color){
+
+
+};
+
 GALAXY.util.array_to_canvas = function (width, height, colors) {
 	var canvas = new Canvas(width, height);
 	var ctx = canvas.getContext('2d');

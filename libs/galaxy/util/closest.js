@@ -98,6 +98,8 @@ GALAXY.util.near_sectors_uv = function (sectors, point, spread) {
 };
 
 GALAXY.util.closest_vertex = function (point, list) {
+//	console.log('getting closest vertex from %s elements', list.length);
+	if (list.length == 1) return list[0];
 	var closest, distance, closest_distance;
 	var val = list.length;
 	for (var vi = 0; vi < val; ++vi) {
@@ -117,19 +119,34 @@ GALAXY.util.closest_vertex = function (point, list) {
 	return closest;
 };
 
+/**
+ * finding the point whose uv property is closest to the uv properties of the points in the list
+ * @param point
+ * @param list
+ * @returns {*}
+ */
 GALAXY.util.closest_uv = function (point, list) {
+	if (!list || (!list.length)) throw new Error('no list');
+	if (list.length == 1) return list[0];
+
+	if (_DEBUG) console.log('util.closest_uv -- closest uv to %s', point.uv);
+
 	var closest, distance, closest_distance;
 	var val = list.length;
 	for (var vi = 0; vi < val; ++vi) {
 		var vertex = list[vi];
 		if (!closest) {
 			closest = vertex;
-			closest_distance = closest.uv.distanceToSquared(point);
+			closest_distance = closest.uv.distanceToSquared(point.uv);
+			if (_DEBUG) 	console.log('first point - closest is %s, distance is %s', closest, closest_distance);
 		} else {
-			distance = vertex.uv.distanceToSquared(point);
+			distance = vertex.uv.distanceToSquared(point.uv);
 			if (distance < closest_distance) {
 				closest_distance = distance;
 				closest = vertex;
+				if (_DEBUG) 	console.log('point %s is closer - closest is %s, distance is %s', vertex, closest, closest_distance);
+			} else {
+				if (_DEBUG) 	console.log('... %s is farther off (%s)', vertex, distance);
 			}
 		}
 	}
@@ -138,6 +155,7 @@ GALAXY.util.closest_uv = function (point, list) {
 };
 
 GALAXY.util.closest_sector = function(point, list){
+	if (list.length == 1) return list[0];
 
 	var closest, distance, closest_distance;
 	var val = list.length;
