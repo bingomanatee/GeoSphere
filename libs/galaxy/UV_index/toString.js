@@ -25,19 +25,17 @@ function _n(value) {
 	return humanize.numberFormat(value, 2);
 };
 
-GALAXY._prototypes.UV_index._toString = _.template('uv_index depth <%= depth %>(<%= min_x %> ~ <%= max_x %>, <%= min_y %> ~ <%= max_y %>): <%= children %> children, <%= vertices %> vertices');
+GALAXY._prototypes.UV_index._toString = _.template('uv_index depth <%= depth %>(<%= humanize.numberFormat(min_x, 4) %> ~ <%= humanize.numberFormat(max_x, 4) %>, <%= humanize.numberFormat(min_y, 4) %> ~ <%= humanize.numberFormat(max_y, 4) %>): <%= children %> children, <%= vertices %> vertices: <%= verts %>');
 GALAXY._prototypes.UV_index.toString = function () {
 
 	return GALAXY._prototypes.UV_index._toString(
-		{
-			depth:    this.depth(),
-			min_x:    _n(this.min_x),
-			max_x:    _n(this.max_x),
-			min_y:    _n(this.min_y),
-			max_y:    _n(this.max_y),
+		_.extend({
 			children: this.children.length,
-			vertices: this.vertices.length
-		}
+			vertices: this.vertices.length,
+			verts: this.vertices.join(),
+			humanize: humanize
+		}, this)
+
 	);
 
 };

@@ -20,6 +20,4 @@ if (!GALAXY._prototypes.UV_index) {
 
 GALAXY._prototypes.UV_index.add = function (vertex) {
 	this.vertices.push(vertex);
-
-
-}
+};

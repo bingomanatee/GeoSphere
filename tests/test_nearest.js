@@ -4,7 +4,7 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../../libs/galaxy/Planet');
+var Planet = require('./../libs/galaxy/Planet');
 var chai = require('chai');
 var humanize = require('humanize');
 
@@ -147,6 +147,7 @@ describe('GALAXY.Planet', function () {
 			it('should be able to find the nearest point', function () {
 				var time = new Date().getTime();
 				var bad = 0;
+
 				samples.forEach(function (sample, i) {
 					var closest = planet.closest_uv(sample, 0, 0.15);
 					var brute_closest = closest_brute_force[i];
@@ -166,13 +167,14 @@ describe('GALAXY.Planet', function () {
 						}
 					}
 
-				})
+				});
+
 				if (_DEBUG) 	console.log('error: %s, samples: %s', bad, samples.length);
 				(bad / samples.length).should.be.below(0.1, 'acceptable error rate');
 
 				var t2 = new Date().getTime();
 
-				if (_DATA) console.log('indexed closest vertex: %s ms', t2 - time);
+				if (_DATA) console.log('indexed closest uv: %s ms', t2 - time);
 			})
 
 		})

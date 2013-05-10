@@ -49,9 +49,7 @@ GALAXY._prototypes.UV_index.load = function (vertices) {
 	if (this.children.length) {
 		_.each(vertices, function (vertex) {
 			var match = _.find(this.children, function (child) {
-				var out = child.contains(vertex);
-				if (_DEBUG) 	console.log('testing if %s contains %s: %s', child, vertex.uv, out);
-				return out;
+				child.contains(vertex);
 			});
 
 			if (match) {

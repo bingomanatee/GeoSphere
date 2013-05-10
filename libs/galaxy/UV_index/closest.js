@@ -25,6 +25,8 @@ if (!GALAXY._prototypes.UV_index) {
 GALAXY._prototypes.UV_index.closest = function (vertex, asArray) {
 	var verts;
 
+	//console.log('looking for closest to %s in %s', util.inspect(vertex), this);
+
 	if (!this.contains(vertex)){
 		if (asArray){
 			return [];
@@ -34,22 +36,27 @@ GALAXY._prototypes.UV_index.closest = function (vertex, asArray) {
 	}
 
 	if (this.children.length) {
-
-		verts = _.map(this.children, function (uv_index) {
+		verts =  _.compact(_.flatten([ _.map(this.children, function (uv_index) {
 			return uv_index.closest(vertex, true);
-		})
-	} else {
+		}), this.vertices]));
+	} else if (this.vertices.length){
 		verts = this.vertices;
+	} else {
+		return [];
 	}
 
 	if (!verts || !verts.length) {
-		console.log('cannot find vertices list for %s, %s', this, this.report());
-		throw new Error('closest: no list');
+		//console.log('cannot find vertices list for %s, %s', this, this.report());
+		return asArray ? [] : false;
+		//throw new Error('closest: no list');
 	}
 
+	//console.log('verts: %s', util.inspect(verts));
+
 	if (asArray){
-		return verts;
+		return _.compact(verts);
 	}else {
+	//	console.log('returning util closest from %s', util.inspect(verts));
 		return GALAXY.util.closest_uv(vertex, _.flatten(verts));
 	}
 };

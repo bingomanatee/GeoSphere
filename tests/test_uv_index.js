@@ -4,7 +4,7 @@
 
 var util = require('util');
 var _ = require('underscore');
-var UV_index = require('./../../libs/galaxy/UV_index');
+var UV_index = require('./../libs/galaxy/UV_index');
 var chai = require('chai');
 var humanize = require('humanize');
 var THREE = require('three');

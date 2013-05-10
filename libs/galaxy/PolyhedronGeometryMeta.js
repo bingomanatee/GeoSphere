@@ -196,3 +196,47 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 };
 
 THREE.PolyhedronGeometry.prototype = Object.create(THREE.Geometry.prototype);
+
+if (!THREE.utils) {
+	THREE.utils = {};
+}
+
+/**
+ * lat ranges from - 90 degrees ( - PI radians) at the south pole to 90 degrees (+ PI radians) at the north pole
+ * lon ranges from 0 degrees (0 radians) to 360 degrees (2 PI radians).
+ * the lon (x) scale goes from 90(x = 0) to 360/0 degrees, then from 0 to 90 at the right edge (x = 1);
+ *
+ * lat -90 deg = y 100%;
+ * lat  90 deg = y 0%
+ *
+ * lat 0, x = 75%;
+ * lat 90, x = 100%;
+ * lat 180, x = 25%;
+ * lat 270, x = 50%;
+ * lat 360, x = 75%
+ */
+THREE.utils.latLonToVertex = (function () {
+
+	var geometry = new THREE.SphereGeometry(1, 4, 4);
+	var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	var origin = new THREE.Mesh(geometry, material);
+	var origin2 = new THREE.Mesh(geometry, material);
+	var offset = new THREE.Mesh(geometry, material);
+	offset.position.z = 1;
+	origin.add(origin2);
+	origin2.add(offset);
+
+	return function (lat, lon, degrees) {
+		if (degrees) {
+			lat *= Math.PI / 180;
+			lon *= Math.PI / 180;
+		}
+
+		origin.rotation.y = lon;
+		origin2.rotation.x = lat;
+		origin.updateMatrixWorld();
+		var abs = new THREE.Vector3();
+		abs.getPositionFromMatrix(offset.matrixWorld);
+		return THREE.spherical_vector(abs);
+	}
+})();

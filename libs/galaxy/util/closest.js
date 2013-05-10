@@ -97,6 +97,27 @@ GALAXY.util.near_sectors_uv = function (sectors, point, spread) {
 	return GALAXY.util.near_to_sector(nears, spread);
 };
 
+GALAXY.util.closest_node = function(point, list){
+	if (list.length == 1) return list[0];
+	var closest, distance, closest_distance;
+	var val = list.length;
+	for (var vi = 0; vi < val; ++vi) {
+		var node = list[vi];
+		if (!closest) {
+			closest = node;
+			closest_distance = closest.vertex.distanceToSquared(point);
+		} else {
+			distance = node.vertex.distanceToSquared(point);
+			if (distance < closest_distance) {
+				closest_distance = distance;
+				closest = node;
+			}
+		}
+	}
+
+	return closest;
+}
+
 GALAXY.util.closest_vertex = function (point, list) {
 //	console.log('getting closest vertex from %s elements', list.length);
 	if (list.length == 1) return list[0];
@@ -127,7 +148,12 @@ GALAXY.util.closest_vertex = function (point, list) {
  */
 GALAXY.util.closest_uv = function (point, list) {
 	if (!list || (!list.length)) throw new Error('no list');
+	if (!point){
+		throw new Error('no point');
+	}
 	if (list.length == 1) return list[0];
+
+	var point_uv = point.uv ? point.uv : point;
 
 	if (_DEBUG) console.log('util.closest_uv -- closest uv to %s', point.uv);
 
@@ -137,10 +163,10 @@ GALAXY.util.closest_uv = function (point, list) {
 		var vertex = list[vi];
 		if (!closest) {
 			closest = vertex;
-			closest_distance = closest.uv.distanceToSquared(point.uv);
+			closest_distance = closest.uv.distanceToSquared(point_uv);
 			if (_DEBUG) 	console.log('first point - closest is %s, distance is %s', closest, closest_distance);
 		} else {
-			distance = vertex.uv.distanceToSquared(point.uv);
+			distance = vertex.uv.distanceToSquared(point_uv);
 			if (distance < closest_distance) {
 				closest_distance = distance;
 				closest = vertex;

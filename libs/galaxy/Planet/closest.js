@@ -7,6 +7,8 @@ if (typeof module !== 'undefined') {
 	var util = require('util');
 	var _DEBUG = false;
 	var humanize = require('humanize');
+	var UV_index = require('./../UV_index');
+
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};
@@ -32,33 +34,31 @@ if (!GALAXY._prototypes.Planet) {
  *
  * @param point
  */
-GALAXY._prototypes.Planet.closest_uv = function (uv, finest_detail, spread) {
-	if (!finest_detail){
-		finest_detail = 0;
-	}
-	if (!spread){
-		spread = 0.05;
-	}
+GALAXY._prototypes.Planet.closest_uv = (function () {
 
-	var closest_top_sectors = this.closest_top_sectors_uv(uv, spread, finest_detail);
-	//console.log('closest sectors: %s (%s items)', closest_top_sectors, closest_top_sectors.length);
-	var closest_vertexes = _.map(closest_top_sectors, function(sector){
-		return sector.closest_uv(uv, spread);
-	});
+	function close_uv(uv) {
+		if (!this._uv_index){
 
-	return GALAXY.util.closest_uv(uv, closest_vertexes);
-};
+			this._uv_index = new GALAXY.UV_index();
+			this._uv_index.divide(6);
+			this._uv_index.load(this.get_vertices());
+		}
+		return this._uv_index.closest(uv);
+	};
+
+	return close_uv;
+})();
 
 GALAXY._prototypes.Planet.closest_vertex = function (point, finest_detail, spread) {
-	if (!finest_detail){
+	if (!finest_detail) {
 		finest_detail = 0;
 	}
-	if (!spread){
+	if (!spread) {
 		spread = 0.05;
 	}
 
 	var closest_top_sectors = this.closest_top_sectors(point, spread);
-	var closest_vertexes = _.map(closest_top_sectors, function(sector){
+	var closest_vertexes = _.map(closest_top_sectors, function (sector) {
 		return sector.closest_vertex(point, spread, finest_detail);
 	})
 
@@ -66,15 +66,15 @@ GALAXY._prototypes.Planet.closest_vertex = function (point, finest_detail, sprea
 };
 
 GALAXY._prototypes.Planet.closest_sector = function (point, finest_detail, spread) {
-	if (!finest_detail){
+	if (!finest_detail) {
 		finest_detail = 0;
 	}
-	if (!spread){
+	if (!spread) {
 		spread = 0.05;
 	}
 
 	var closest_top_sectors = this.closest_top_sectors(point, spread);
-	var closest_sectors = _.map(closest_top_sectors, function(sector){
+	var closest_sectors = _.map(closest_top_sectors, function (sector) {
 		return sector.closest_sector(point, spread, finest_detail);
 	});
 
@@ -87,26 +87,28 @@ GALAXY.util.near_sectors = function (sectors, point, spread, skipRange) {
 		spread = 0.1;
 	}
 
-	if (!skipRange) sectors = _.filter(sectors, function(sector){
-		var center = sector.center;
+	if (!skipRange) {
+		sectors = _.filter(sectors, function (sector) {
+			var center = sector.center;
 
-		if(point.x > 0){
-			if (center.x < -0.1) return false;
-		} else {
-			if (center.x > 0.1) return false;
-		}
-		if(point.y > 0){
-			if (center.y < -0.1) return false;
-		} else {
-			if (center.y > 0.1) return false;
-		}
-		if(point.z > 0){
-			if (center.z < -0.1) return false;
-		} else {
-			if (center.z > 0.1) return false;
-		}
-		return true;
-	});
+			if (point.x > 0) {
+				if (center.x < -0.1) return false;
+			} else {
+				if (center.x > 0.1) return false;
+			}
+			if (point.y > 0) {
+				if (center.y < -0.1) return false;
+			} else {
+				if (center.y > 0.1) return false;
+			}
+			if (point.z > 0) {
+				if (center.z < -0.1) return false;
+			} else {
+				if (center.z > 0.1) return false;
+			}
+			return true;
+		});
+	}
 
 	var nears = _.map(sectors, function (sector) {
 		return {
@@ -115,10 +117,10 @@ GALAXY.util.near_sectors = function (sectors, point, spread, skipRange) {
 		};
 	});
 
-	return GALAXY-util.near_to_sector(nears, spread);
+	return GALAXY.util.near_to_sector(nears, spread);
 };
 
-GALAXY.util.near_to_sector = function(nears, spread){
+GALAXY.util.near_to_sector = function (nears, spread) {
 
 	var max_distance, min_distance;
 
@@ -134,7 +136,7 @@ GALAXY.util.near_to_sector = function(nears, spread){
 
 	if (max_distance == min_distance) return nears;
 
-	var spread_distance = Math.max(min_distance * (1 + spread),  min_distance + ((max_distance - min_distance) * spread));
+	var spread_distance = Math.max(min_distance * (1 + spread), min_distance + ((max_distance - min_distance) * spread));
 
 	nears = _.filter(nears, function (near) {
 		return  (near.distance <= spread_distance);

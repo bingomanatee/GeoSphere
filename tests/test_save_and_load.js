@@ -4,7 +4,7 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../../libs/galaxy/Planet');
+var Planet = require('./../libs/galaxy/Planet');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');

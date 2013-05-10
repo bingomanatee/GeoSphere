@@ -6,7 +6,8 @@ if (typeof module !== 'undefined') {
 	var _ = require('underscore');
 	var util = require('util');
 	var _DEBUG = false;
-	var canvas = require('Canvas');
+	var fs = require('fs');
+	var Canvas = require('Canvas');
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};
@@ -27,21 +28,49 @@ GALAXY.util.alpha = function(value){
 	return Math.max(0, Math.min(1, value));
 };
 
+/**
+ * returns a canvas given size and a pixel interpolation function
+ * @param width
+ * @param height
+ * @param pt_to_color
+ * @returns Canvas
+ */
 GALAXY.util.draw = function(width, height, pt_to_color){
+	var out = [];
+	_.each(_.range(0, width), function(x){
+		_.each(_.range(0, height), function(y){
+			out.push(pt_to_color(x, y));
+		})
+	})
 
+	return GALAXY.util.array_to_canvas(width, height, out);
+};
 
+GALAXY.util.canvas_to_png = function(canvas, file_path, done){
+
+	var out = fs.createWriteStream(file_path);
+	var stream = canvas.pngStream();
+
+	stream.on('data', function (c) {
+		out.write(c);
+	});
+
+	stream.on('end', function () {
+		setTimeout(done, 500);
+	})
 };
 
 GALAXY.util.array_to_canvas = function (width, height, colors) {
+	if (_DEBUG) console.log('drawing %s, %s with %s', width, height, util.inspect(colors));
+
 	var canvas = new Canvas(width, height);
 	var ctx = canvas.getContext('2d');
 
 	colors.forEach(function (color, index) {
-		var x = index % width;
-		var y = Math.floor(index / width);
+		var y = index % height;
+		var x = Math.floor(index / height);
 
-		if (color.length == 3){
-
+		if (color.length < 4){
 			ctx.fillStyle = util.format('rgba(%s, %s, %s, 1)',
 				GALAXY.util.channel(color[0]), GALAXY.util.channel(color[1]), GALAXY.util.channel(color[2]));
 		} else {
@@ -49,10 +78,13 @@ GALAXY.util.array_to_canvas = function (width, height, colors) {
 				GALAXY.util.channel(color[0]), GALAXY.util.channel(color[1]), GALAXY.util.channel(color[2]),GALAXY.util.alpha(color[3]));
 		}
 
+	//	console.log('%s, %s fillStyle: %s', x, y, ctx.fillStyle);
+
 		ctx.beginPath();
 		ctx.rect(x, y, 1, 1);
 		ctx.closePath();
 		ctx.fill();
 	});
 
+	return canvas;
 };
