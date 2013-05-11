@@ -46,6 +46,16 @@ GALAXY.util.draw = function(width, height, pt_to_color){
 	return GALAXY.util.array_to_canvas(width, height, out);
 };
 
+GALAXY.util.bg_color = function(ctx, width,height, color){
+	if (color.getStyle) color = color.getStyle();
+
+	ctx.fillStyle = color;
+	ctx.beginPath();
+	ctx.rect(0, 0, width, height);
+	ctx.closePath();
+	ctx.fill();
+};
+
 GALAXY.util.canvas_to_png = function(canvas, file_path, done){
 
 	var out = fs.createWriteStream(file_path);
@@ -56,7 +66,9 @@ GALAXY.util.canvas_to_png = function(canvas, file_path, done){
 	});
 
 	stream.on('end', function () {
-		setTimeout(done, 500);
+		var delay =  Math.sqrt(canvas.width * canvas.height)/5;
+		console.log('width: %s, height: %s, delay: %s', canvas.width, canvas.height, delay);
+		setTimeout(done,  Math.min(4000,delay));
 	})
 };
 

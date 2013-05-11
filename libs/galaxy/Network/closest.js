@@ -24,7 +24,14 @@ if (!GALAXY._prototypes.Network) {
 }
 
 /**
- * links points into a network of data
+ * returns the closest point on a network to the given point.
+ * This "walker" algorithm finds a good starting point
+ * by finding the closest cardinal network point
+ * then "walking" the near points until a point is found
+ * that is closer to the target point than any of its neighbors.
+ *
+ * This algorithm can perform 80 -1,500 finds a millisecond
+ * for a 7-level network.
  *
  * @param id: {String | ObjectId}
  * @param cb: {function}

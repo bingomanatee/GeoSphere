@@ -6,7 +6,7 @@ if (typeof module !== 'undefined') {
 	var THREE = require('three');
 	var _ = require('underscore');
 	var util = require('util');
-	var _DEBUG = 1;
+	var _DEBUG = false;
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};

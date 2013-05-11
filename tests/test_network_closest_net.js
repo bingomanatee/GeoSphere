@@ -15,7 +15,14 @@ var GALAXY = require('./../libs/galaxy/GALAXY');
 if (_.isFunction(chai.should)) {
 	chai.should();
 }
-var _DEBUG = 2;
+var _DEBUG = false;
+
+/**
+ * tested an alternate system of finding
+ * the nearest point on a network by integrating
+ * down the parent tree.
+ * Not as efficient as the "walker" algorithm.
+ */
 
 describe('GALAXY.Network', function () {
 
@@ -25,9 +32,9 @@ describe('GALAXY.Network', function () {
 	var SAMPLE_LENGTH = 1000;
 
 	before(function () {
-		_.range(-1, 1.1, 1).forEach(function (x) {
-			_.range(-1, 1.1, 1).forEach(function (y) {
-				_.range(-1, 1.1, 1).forEach(function (z) {
+		_.range(-1, 1.1, 0.1).forEach(function (x) {
+			_.range(-1, 1.1, 0.1).forEach(function (y) {
+				_.range(-1, 1.1, 0.1).forEach(function (z) {
 					samples.push(THREE.spherical_vector(new THREE.Vector3(x, y, z)));
 				})
 			})
@@ -50,7 +57,7 @@ describe('GALAXY.Network', function () {
 	function _comp(index, net) {
 		var index_results_set = indexed_results[index];
 		var brute_force_result_set = brute_force_results[index];
-		_.range(0, SAMPLE_LENGTH).forEach(function (i) {
+		_.range(0, index_results_set.length).forEach(function (i) {
 			var bf_result = brute_force_result_set[i];
 			var i_result = index_results_set[i];
 
@@ -67,7 +74,7 @@ describe('GALAXY.Network', function () {
 
 	describe('#closest_net', function () {
 
-		var planet, network_0, network_1, network_2, network_3;
+		var planet, network_0, network_1, network_2, network_3, networks;
 		/*, network_4, network_5, network_6 */
 
 		before(function () {
@@ -76,17 +83,17 @@ describe('GALAXY.Network', function () {
 			network_0 = new Network(planet, 0);
 			network_1 = new Network(planet, 1);
 			network_2 = new Network(planet, 2);
-			network_3 = new Network(planet, 3);
 			/*
+			 network_3 = new Network(planet, 3);
 			 network_4 = new Network(planet, 4);
 			 network_5 = new Network(planet, 5);
 			 network_6 = new Network(planet, 6); */
 
 			network_0.link(network_1);
 			network_1.link(network_2);
-			network_2.link(network_3);
 
-			 /*
+			/*
+			 network_2.link(network_3);
 			 network_3.link(network_4);
 			 network_4.link(network_5);
 			 network_5.link(network_6); */
@@ -118,12 +125,9 @@ describe('GALAXY.Network', function () {
 
 			}
 
-			//, network_3, network_4, network_5, network_6]
-			[network_0, network_1, network_2, network_3].forEach(function (net, i) {
+			 networks = [network_0, network_1, network_2];
 
-				/**
-				 * calculating closest by brute force
-				 */
+			function _calc_brute_force_data(net, i) {
 				var start_time = new Date().getTime();
 				var result_set = [];
 				samples.forEach(function (s) {
@@ -137,23 +141,30 @@ describe('GALAXY.Network', function () {
 					, net, end_time - start_time, samples.length);
 				data.push([net.detail, 'brute force', end_time - start_time, net.node_list.length, samples.length]);
 				brute_force_results.push(_annotate(result_set, net));
+			}
 
-				/**
-				 * calculating closest by index
-				 */
-				start_time = new Date().getTime();
-				result_set = [];
+			function _calc_index_data(net, i) {
+				var start_time = new Date().getTime();
+				var result_set = [];
 				samples.forEach(function (s) {
-					var t = network_2.closest_net(s, i);
+					var t = net.closest_net(s, i);
 					result_set.push(t.index);
 					if (_DEBUG) console.log("INDEXED closest to %s \n   in %s \n   is %s - distance %s", s, net, t, s.distanceTo(t.vertex));
 				})
 
-				end_time = new Date().getTime();
+				var end_time = new Date().getTime();
 				console.log('indexed search %s: %s ms, %s samples'
 					, net, end_time - start_time, samples.length);
 				data.push([net.detail, 'indexed', end_time - start_time, net.node_list.length, samples.length]);
 				indexed_results.push(_annotate(result_set, net));
+			}
+
+			//, network_3, network_4, network_5, network_6]
+			networks.forEach(function (net, i) {
+
+				_calc_brute_force_data(net, i);
+
+				_calc_index_data(net, i);
 			})
 
 		}) // end before
@@ -161,11 +172,11 @@ describe('GALAXY.Network', function () {
 		it('should be able to produce the same results in indexed search as in brute force search', function () {
 
 			//, network_3, network_4, network_5, network_6
-			[network_0, network_1, network_2, network_3].forEach(function (net, i) {
+			networks.forEach(function (net, i) {
 				_comp(i, net);
 			});
 
-		})
+		});
 
 		after(function () {
 			data.forEach(function (l) {

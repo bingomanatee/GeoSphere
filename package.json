@@ -1,24 +1,24 @@
 {
-	"name":            "GeoSphere",
-	"version":         "0.0.1",
-	"private":         false,
-	"scripts":         {},
-	"dependencies":    {
-		"three":      ">= 0.56",
-		"underscore": ">=1.4.3",
-		"async":      "0.1.22",
-		"canvas":     "*",
-		"humanize":   "0.0.6",
-		"mongoose":   "~3.6.4"
-	},
-	"devDependencies": {
-		"mocha":  "0.3.0",
-		"spec":   "*",
-		"mkdirp": "0.3.4",
-		"rmdir":  "1.0.0",
-		"chai":   "1.4.2",
-		"should": "1.2.1"
-
-	},
-	"test":            "mocha tests -R spec"
+  "name": "GeoSphere",
+  "version": "0.0.1",
+  "private": false,
+  "scripts": {},
+  "dependencies": {
+    "three": ">= 0.56",
+    "underscore": ">=1.4.3",
+    "async": "0.1.22",
+    "canvas": "*",
+    "humanize": "0.0.6",
+    "mongoose": "~3.6.4"
+  },
+  "devDependencies": {
+    "mocha": "0.3.0",
+    "spec": "*",
+    "mkdirp": "0.3.4",
+    "rmdir": "1.0.0",
+    "chai": "1.4.2",
+    "should": "1.2.1",
+    "gate": "~0.3.0"
+  },
+  "test": "mocha tests -R spec"
 }

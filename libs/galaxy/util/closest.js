@@ -97,18 +97,24 @@ GALAXY.util.near_sectors_uv = function (sectors, point, spread) {
 	return GALAXY.util.near_to_sector(nears, spread);
 };
 
-GALAXY.util.closest_node = function(point, list){
+GALAXY.util.closest_node = function(point, list, tested){
 	if (list.length == 1) return list[0];
 	var closest, distance, closest_distance;
 	var val = list.length;
 	for (var vi = 0; vi < val; ++vi) {
 		var node = list[vi];
+		if (tested && tested[node.index]) {
+			continue;
+		}
 		if (!closest) {
 			closest = node;
 			closest_distance = closest.vertex.distanceToSquared(point);
 		} else {
 			distance = node.vertex.distanceToSquared(point);
 			if (distance < closest_distance) {
+				if (tested){
+					tested[node.index] = true;
+				}
 				closest_distance = distance;
 				closest = node;
 			}
