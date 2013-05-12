@@ -46,7 +46,7 @@ GALAXY._prototypes.Network_Node.closest = function (point, startTime) {
 
 		var distance = nearest.vertex.distanceToSquared(point);
 
-		var list = nearest.near_list;
+		var list = nearest.near_nodes;
 		var ns = list.length;
 		iterate = false;
 

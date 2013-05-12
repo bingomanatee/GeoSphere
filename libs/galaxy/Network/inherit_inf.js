@@ -23,31 +23,25 @@ if (!GALAXY._prototypes.Network) {
 }
 
 /**
- *
- * runs a function that iterates over a networks lower resolution parents.
+ * runs a function that iterates over a networks higher resolution children.
  *
  * @param id: {String | ObjectId}
  * @param cb: {function}
  */
 
-GALAXY._prototypes.Network.inherit = (function () {
+GALAXY._prototypes.Network.inherit_inf = (function () {
 
-	function inherit(iter, init, fin) {
-
+	function inherit_inf(iter, init, fin) {
 		if (init) {
 			this.each(function (node) {
-				init(node, node.influencers);
-			})
+				init(node, node.children);
+			});
 		}
 
 		this.each(function (node) {
-			if (init) {
-				init(node, node.influencers);
-			}
-			_.each(node.parents, function (parent) {
-				iter(node, parent);
+			_.each(node.influencers, function (inf) {
+				iter(node, inf.node, inf.weight);
 			});
-
 		});
 
 		if (fin) {
@@ -57,5 +51,5 @@ GALAXY._prototypes.Network.inherit = (function () {
 		}
 	}
 
-	return inherit;
+	return inherit_inf;
 })();

@@ -125,7 +125,9 @@ GALAXY.util.closest_node = function(point, list, tested){
 }
 
 GALAXY.util.closest_vertex = function (point, list) {
-//	console.log('getting closest vertex from %s elements', list.length);
+	if (!point){
+		throw new Error('closest_vertex passed empty point');
+	}
 	if (list.length == 1) return list[0];
 	var closest, distance, closest_distance;
 	var val = list.length;

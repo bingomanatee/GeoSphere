@@ -36,6 +36,7 @@ GALAXY.util.alpha = function(value){
  * @returns Canvas
  */
 GALAXY.util.draw = function(width, height, pt_to_color){
+	if (_DEBUG) console.log('drawing %s x %s canvas', width, height);
 	var out = [];
 	_.each(_.range(0, width), function(x){
 		_.each(_.range(0, height), function(y){
@@ -66,8 +67,8 @@ GALAXY.util.canvas_to_png = function(canvas, file_path, done){
 	});
 
 	stream.on('end', function () {
-		var delay =  Math.sqrt(canvas.width * canvas.height)/5;
-		console.log('width: %s, height: %s, delay: %s', canvas.width, canvas.height, delay);
+		var delay =  Math.max(500, (canvas.width * canvas.height)/100);
+		if (_DEBUG) console.log('width: %s, height: %s, delay: %s', canvas.width, canvas.height, delay);
 		setTimeout(done,  Math.min(4000,delay));
 	})
 };

@@ -4,13 +4,13 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../libs/galaxy/Planet');
-var Network = require('./../libs/galaxy/Network');
+var Planet = require('./../../libs/galaxy/Planet');
+var Network = require('./../../libs/galaxy/Network');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');
 var path = require('path');
-var GALAXY = require('./../libs/galaxy/GALAXY');
+var GALAXY = require('./../../libs/galaxy/GALAXY');
 
 if (_.isFunction(chai.should)) {
 	chai.should();

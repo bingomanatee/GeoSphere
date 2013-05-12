@@ -9,7 +9,8 @@
     "async": "0.1.22",
     "canvas": "*",
     "humanize": "0.0.6",
-    "mongoose": "~3.6.4"
+    "mongoose": "~3.6.4",
+    "simplex-noise": "~2.1.1"
   },
   "devDependencies": {
     "mocha": "0.3.0",
@@ -18,7 +19,8 @@
     "rmdir": "1.0.0",
     "chai": "1.4.2",
     "should": "1.2.1",
-    "gate": "~0.3.0"
+    "gate": "~0.3.0",
+    "csv": "~0.3.0"
   },
   "test": "mocha tests -R spec"
 }

@@ -31,13 +31,15 @@ if (!GALAXY._prototypes.Network_Node) {
 
 GALAXY._prototypes.Network_Node.add_near = (function () {
 
-	function add_near(vertex) {
-		if (_.isNumber(vertex)) {
-			vertex = this.network.planet.get_vertex(vertex);
+	function add_near(item) {
+		var near;
+		if (_.isNumber(item)) {
+			 near = this.network.nodes[item];
+		} else {
+			 near = this.network.nodes[item.index];
 		}
-		var near = this.network.nodes[vertex.index];
 		if (!near) {
-			near = this.network.make_node(vertex);
+			near = this.network.make_node(item);
 			if (_DEBUG)    console.log('made and adding near %s to %s', near.index, this.index);
 		}
 		this.nears[near.index] = near;

@@ -45,7 +45,7 @@ if (_DEBUG)	console.log('****************** finding near uv: %s', uv);
 	do {
 		var distance = nearest.uv.distanceToSquared(uv);
 
-		var list = nearest.near_list;
+		var list = nearest.near_nodes;
 		var ns = list.length;
 		iterate = false;
 

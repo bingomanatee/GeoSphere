@@ -17,12 +17,14 @@ if (typeof module !== 'undefined') {
 
 GALAXY.Network = (function () {
 
-	function Network(planet, detail) {
+	function Network(planet, detail, no_init) {
 		this.planet = planet;
 		this.nodes = {};
 		this.node_list = [];
 		this.detail = detail;
-		this.init();
+		if (!no_init) {
+			this.init();
+		}
 	}
 
 	Network.prototype = GALAXY._prototypes.Network;

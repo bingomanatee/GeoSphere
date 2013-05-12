@@ -7,6 +7,7 @@ if (typeof module !== 'undefined') {
 	var _ = require('underscore');
 	var Sector = require('./../Sector');
 	var util = require('util');
+	var Network = require('./../Network');
 } else {
 	if (!window.GALAXY) {
 		window.GALAXY = {};
@@ -29,19 +30,25 @@ if (!GALAXY._prototypes.Planet) {
  * @param cb: {function}
  */
 
-GALAXY._prototypes.Planet.init_iso = function (depth) {
-	if (!depth) {
-		depth = this.options.depth || 0;
+GALAXY._prototypes.Planet.init_networks = function (depth) {
+	if (arguments.length < 1) {
+		depth = this.depth;
+	} else {
+		depth = Math.min(depth, this.depth);
 	}
 
-	this.iso = new THREE.IcosahedronGeometry(1, depth);
-	this.vertices = this.iso.vertices;
-	this.sectors = _.map(this.iso.sectors, function(data){
-		return new Sector(this, data);
+	if (!this.networks) {
+		this.networks = [];
+	}
+
+	_.each(_.range(0, depth + 1), function (d) {
+		var network = new Network(this, d);
+		this.networks[d] = network;
+		if (d > 0) {
+			var dd = d - 1;
+			var prev_network = this.networks[dd];
+			prev_network.link(network);
+		}
 	}, this);
-
-	this.index_sectors();
-	this.options.depth = this.depth = depth;
-
 
 };

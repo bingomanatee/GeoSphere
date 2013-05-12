@@ -65,6 +65,9 @@ GALAXY._prototypes.Network.closest = (function () {
 	//console.log('cardinals: %s', util.inspect(cardinals));
 
 	return function (point, bf) {
+		if (!point){
+			throw new Error('network.closest: point empty');
+		}
 
 		if (_DEBUG) console.log('looking for closest point %s in node_list %s', point, this.node_list.length);
 		if (bf || this.node_list.length < 100) {

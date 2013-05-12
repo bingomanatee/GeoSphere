@@ -49,7 +49,7 @@ GALAXY._prototypes.Network.init = (function () {
 
 		this.node_list = _.values(this.nodes);
 		_.each(this.nodes, function(node){
-			node.near_list = _.values(node.nears);
+			node.near_nodes = _.values(node.nears);
 		})
 
 		if (_DEBUG){

@@ -4,13 +4,13 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../libs/galaxy/Planet');
-var Network = require('./../libs/galaxy/Network');
+var Planet = require('./../../libs/galaxy/Planet');
+var Network = require('./../../libs/galaxy/Network');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');
 var path = require('path');
-var GALAXY = require('./../libs/galaxy/GALAXY');
+var GALAXY = require('./../../libs/galaxy/GALAXY');
 var Canvas = require('canvas');
 var test_root = path.resolve(__dirname, '../test_resources/network');
 var Gate = require('gate');
@@ -86,7 +86,7 @@ describe('GALAXY.Network', function () {
 				gate.await(done);
 			})
 
-			it('should be able to graph a canvas - children - <=6s', function (done) {
+			it.skip('should be able to graph a canvas - children - <= 6s', function (done) {
 				var gate = Gate.create();
 				networks.forEach(function (network) {
 					var graph = new Canvas(WIDTH, HEIGHT);
@@ -100,7 +100,7 @@ describe('GALAXY.Network', function () {
 				gate.await(done);
 
 			});
-			it('should be able to graph a canvas - children - 12s', function (done) {
+			it.skip('should be able to graph a canvas - children - 12s', function (done) {
 				var gate = Gate.create();
 
 				networks.forEach(function (network) {
@@ -115,7 +115,7 @@ describe('GALAXY.Network', function () {
 				gate.await(done);
 			});
 
-			it('should be able to graph a canvas - children - 12 .. 17', function (done) {
+			it.skip('should be able to graph a canvas - children - 12 .. 17', function (done) {
 				var gate = Gate.create();
 
 				networks.forEach(function (network) {
@@ -130,7 +130,7 @@ describe('GALAXY.Network', function () {
 				gate.await(done);
 			});
 
-			it('should be able to graph a canvas - children - >= 18s', function (done) {
+			it.skip('should be able to graph a canvas - children - >= 18s', function (done) {
 				var gate = Gate.create();
 
 				networks.forEach(function (network) {
@@ -156,7 +156,7 @@ describe('GALAXY.Network', function () {
 				})
 				gate.await(done);
 			});
-			it.only('should survey child density', function () {
+			it.skip('should survey child density', function () {
 				networks.forEach(function (network) {
 					var nbc = _.groupBy(network.node_list, function(node){
 						return node.children.length;

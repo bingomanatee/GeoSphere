@@ -4,13 +4,13 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../libs/galaxy/Planet');
-var Network = require('./../libs/galaxy/Network');
+var Planet = require('./../../libs/galaxy/Planet');
+var Network = require('./../../libs/galaxy/Network');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');
 var path = require('path');
-var GALAXY = require('./../libs/galaxy/GALAXY');
+var GALAXY = require('./../../libs/galaxy/GALAXY');
 
 if (_.isFunction(chai.should)) {
 	chai.should();
@@ -165,7 +165,7 @@ describe('GALAXY.Network', function () {
 				node.data.color = color;
 			});
 
-			network_0.inherit(
+			network_0.simplify(
 				function __iterate(node, parent) {
 					if (!parent.data.colors) parent.data.colors = [];
 					node.data.colors.push(parent.data.color);
@@ -294,8 +294,8 @@ describe('GALAXY.Network', function () {
 				node.data.color.multiplyScalar(s);
 			}
 
-			network_1.inherit(__iterate, __init, __fin);
-			network_0.inherit(__iterate, __init, __fin);
+			network_1.simplify(__iterate, __init, __fin);
+			network_0.simplify(__iterate, __init, __fin);
 		});
 
 		it('should be able to mix colors', function (done) {

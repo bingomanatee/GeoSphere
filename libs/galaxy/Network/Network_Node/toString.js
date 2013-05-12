@@ -34,7 +34,8 @@ GALAXY._prototypes.Network_Node.toString = (function () {
 
 	var template = _.template('NODE #<%= nid %> - index <%= index %>: <%= index %>(network <%= network.detail %>) -- vertex (<%= vertex.toString(true) %>) :' +
 		' <%= parents.length %> parents (<%= _.pluck(parents, "index").join(",") %>), ' +
-		' <%= children.length %> children (<%= _.pluck(children, "index").join(",") %>)');
+		' <%= children.length %> children (<%= _.pluck(children, "index").join(",") %>)' +
+		' nears: (<%= _.pluck(near_nodes, "index").join(",") %>)');
 
 	//@TODO: can we compose?
 	function toString() {

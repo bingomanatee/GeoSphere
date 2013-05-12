@@ -24,38 +24,35 @@ if (!GALAXY._prototypes.Network) {
 
 /**
  *
- * runs a function that iterates over a networks lower resolution parents.
+ * runs a function that iterates over a networks higher resolution children.
+ * note - influencers are parents and parent nearbys
  *
  * @param id: {String | ObjectId}
  * @param cb: {function}
  */
 
-GALAXY._prototypes.Network.inherit = (function () {
+GALAXY._prototypes.Network.simplify = (function () {
 
-	function inherit(iter, init, fin) {
+	function simplify(iter, init, fin) {
 
 		if (init) {
 			this.each(function (node) {
-				init(node, node.influencers);
-			})
+				init(node, node.children);
+			});
 		}
 
-		this.each(function (node) {
-			if (init) {
-				init(node, node.influencers);
-			}
-			_.each(node.parents, function (parent) {
-				iter(node, parent);
+		this.each(function(node){
+			_.each(node.children, function(child){
+				iter(node, child);
 			});
-
 		});
 
-		if (fin) {
+		if (fin){
 			this.each(function (node) {
 				fin(node, node.influencers);
-			})
+			});
 		}
 	}
 
-	return inherit;
+	return simplify;
 })();
