@@ -12,7 +12,7 @@ var fs = require('fs');
 var path = require('path');
 var GALAXY = require('./../../libs/galaxy/GALAXY');
 var Canvas = require('canvas');
-var test_root = path.resolve(__dirname, '../test_resources/network');
+var test_root = path.resolve(__dirname, '../../test_resources/network');
 var Gate = require('gate');
 
 if (_.isFunction(chai.should)) {

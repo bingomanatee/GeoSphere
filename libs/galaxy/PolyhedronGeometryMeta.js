@@ -69,6 +69,7 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 			new THREE.Vector3(vertices[ i ][ 0 ], vertices[ i ][ 1 ], vertices[ i ][ 2 ]),
 			that.vertices
 		);
+		vector.root_sectors = [];
 		vector.detail = detail;
 	}
 
@@ -76,7 +77,7 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 
 	for (var i = 0, l = faces.length; i < l; i++) {
 
-		make(p[ faces[ i ][ 0 ] ], p[ faces[ i ][ 1 ] ], p[ faces[ i ][ 2 ] ], detail, -1);
+		make(p[ faces[ i ][ 0 ] ], p[ faces[ i ][ 1 ] ], p[ faces[ i ][ 2 ] ], detail, -1, i);
 
 	}
 
@@ -90,16 +91,27 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 
 	}
 
+	function _sectorize(v, s){
+		if (!v.root_sectors){
+			v.root_sectors = [s];
+		} else if (!_.contains(v.root_sectors, s)){
+			v.root_sectors.push(s);
+		}
+	}
 	// Approximate a curved face with recursively sub-divided triangles.
 
-	function make(v1, v2, v3, detail, parent_sector) {
+	function make(v1, v2, v3, detail, parent_sector, root_sector) {
+		_sectorize(v1, root_sector);
+		_sectorize(v2, root_sector);
+		_sectorize(v3, root_sector);
 
 		var sector_id = that.sectors.length;
 		var sector = {
 			vertices: [v1.index, v2.index, v3.index],
 			detail:   detail,
 			id:       sector_id,
-			parent:   parent_sector
+			parent:   parent_sector,
+			root_sector: root_sector
 		};
 		that.sectors.push(sector);
 
@@ -126,22 +138,26 @@ THREE.PolyhedronGeometry = function (vertices, faces, radius, detail) {
 				midpoint(v1, v2, detail, sector_id),
 				midpoint(v1, v3, detail, sector_id),
 				detail,
-				sector_id); // top quadrant
+				sector_id,
+				root_sector); // top quadrant
 			make(midpoint(v1, v2, detail, sector_id),
 				v2,
 				midpoint(v2, v3, detail, sector_id),
 				detail,
-				sector_id); // left quadrant
+				sector_id,
+				root_sector); // left quadrant
 			make(midpoint(v1, v3, detail, sector_id),
 				midpoint(v2, v3, detail, sector_id),
 				v3,
 				detail,
-				sector_id); // right quadrant
+				sector_id,
+				root_sector); // right quadrant
 			make(midpoint(v1, v2, detail, sector_id),
 				midpoint(v2, v3, detail, sector_id),
 				midpoint(v1, v3, detail, sector_id),
 				detail,
-				sector_id); // center quadrant
+				sector_id,
+			root_sector); // center quadrant
 
 		}
 

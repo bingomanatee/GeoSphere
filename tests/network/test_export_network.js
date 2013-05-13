@@ -14,6 +14,7 @@ var GALAXY = require('./../../libs/galaxy/GALAXY');
 var Canvas = require('canvas');
 var test_root = path.resolve(__dirname, '../../test_resources/network/exports');
 var Gate = require('gate');
+var mkdirp = require('mkdirp');
 
 if (_.isFunction(chai.should)) {
 	chai.should();
@@ -23,6 +24,7 @@ var _DEBUG = false;
 var SCALE = 25;
 var WIDTH = 360 * SCALE;
 var HEIGHT = 180 * SCALE;
+var DEPTH = 8;
 
 describe('GALAXY.Network', function () {
 
@@ -32,14 +34,15 @@ describe('GALAXY.Network', function () {
 
 		before(function () {
 			planet = new Planet();
-			planet.init_iso(7);
-			planet.init_networks();
 		});
 
 		function compare_network(network) {
 			var base_network = planet.networks[network.detail];
+			if (base_network.node_list.length > 10000){
+				return;
+			}
 
-			if (_DEBUG)	console.log('comparing network %s to base %s', network, base_network);
+			if (_DEBUG || 1)    console.log('comparing network %s to base %s', network, base_network);
 
 			base_network.node_list.length.should.eql(network.node_list.length, 'length of node lists -- ', network.node_list.length);
 
@@ -76,25 +79,42 @@ describe('GALAXY.Network', function () {
 
 		it('should be able to export networks', function (done) {
 
-			var gate = Gate.create();
-			_.each(planet.networks, function (network) {
-				var file_path = path.resolve(test_root, 'network_' + network.detail + '.bin');
+			planet.init_iso(DEPTH);
+			planet.init_networks();
+			var root = path.resolve(test_root, 'detail_' + DEPTH);
+			mkdirp(root);
+			console.log('root: %s', root);
 
-				network.export(file_path, gate.latch());
-			});
+			var network_index = 0;
 
-			gate.await(function () {
-				if (_DEBUG)			console.log('done exporting');
-				setTimeout(done, 500);
+			function exp() {
+				if (network_index >= planet.networks.length) {
+					console.log('done exporting');
+					return 	setTimeout(done, 500);
+				}
+				var network = planet.networks[network_index];
+				console.log('writing network %s', network);
+				++network_index;
 
-			});
+				var file_path = path.resolve(root, 'network_' + network.detail + '.bin');
+
+				network.export(file_path, function () {
+					console.log('done writing %s', network);
+
+					process.nextTick(exp);
+				})
+			}
+
+			exp();
+
 		});
 
 		it('should be able to import networks', function (done) {
 
+			var root = path.resolve(test_root, 'detail_' + DEPTH);
 			var gate = Gate.create();
 
-			fs.readdir(test_root, function (err, files) {
+			fs.readdir(root, function (err, files) {
 
 				files.forEach(function (file) {
 					if (!/\.bin$/.test(file)) {
@@ -103,7 +123,7 @@ describe('GALAXY.Network', function () {
 					var network = new Network({}, 0, true);
 					var l = gate.latch();
 
-					network.import(path.resolve(test_root, file), function () {
+					network.import(path.resolve(root, file), function () {
 						network.planet = planet;
 
 						compare_network(network);
@@ -112,7 +132,7 @@ describe('GALAXY.Network', function () {
 				})
 
 				gate.await(function () {
-					if (_DEBUG)			console.log('done importing');
+					if (_DEBUG)            console.log('done importing');
 					setTimeout(done, 500);
 
 				});

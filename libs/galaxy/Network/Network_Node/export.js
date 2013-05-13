@@ -43,7 +43,6 @@ GALAXY._prototypes.Network_Node.export = function () {
 		['int', this.index]
 	];
 
-
 	out.push(['float', this.vertex.x]);
 	out.push(['float', this.vertex.y]);
 	out.push(['float', this.vertex.z]);
@@ -69,10 +68,16 @@ GALAXY._prototypes.Network_Node.export = function () {
 		});
 	}
 
-	return out;
 	out.push(['int', this.influence_parents.length]);
 	if (this.influence_parents.length) {
-		_.pluck(this.influence_parents, 'index').forEach(function (index) {
+		_.pluck(this.parents, 'index').forEach(function (index) {
+			out.push(['int', index]);
+		});
+	}
+
+	out.push(['int', this.vertex.root_sectors.length]);
+	if (this.vertex.root_sectors.length) {
+		this.vertex.root_sectors.forEach(function (index) {
 			out.push(['int', index]);
 		});
 	}

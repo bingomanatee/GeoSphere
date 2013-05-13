@@ -33,6 +33,7 @@ if (!GALAXY._prototypes.Network) {
 GALAXY._prototypes.Network.graph = (function () {
 
 	var WHITE = new THREE.Color().setRGB(255, 255, 255);
+	var GREY = new THREE.Color().setRGB(128,128,128);
 	var BLACK = new THREE.Color().setRGB(0, 0, 0);
 
 	function sqiggle_line(context, fx, fy, tx, ty) {
@@ -87,6 +88,7 @@ GALAXY._prototypes.Network.graph = (function () {
 
 	var text_template_children = _.template("<%= index %> c <%= children.length %>");
 	var text_template_parents = _.template("<%= index %> p <%= parents.length %>");
+	var sector_template = _.template("sec <%= vertex.root_sectors.join(',') %>");
 
 	function arrow(ctx, p1, p2, width, color, close) {
 
@@ -171,6 +173,12 @@ GALAXY._prototypes.Network.graph = (function () {
 			ctx.beginPath();
 			ctx.fillStyle = color.getStyle();
 			ctx.fillText(text_template(node), p1.x + 2, p1.y - 2);
+			ctx.closePath();
+
+			ctx.fillStyle = GREY.getStyle();
+			ctx.beginPath();
+			ctx.fillStyle = color.getStyle();
+			ctx.fillText(sector_template(node), p1.x + 2, p1.y - 22);
 			ctx.closePath();
 
 		});
