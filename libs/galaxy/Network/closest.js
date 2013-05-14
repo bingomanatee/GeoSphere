@@ -93,13 +93,17 @@ GALAXY._prototypes.Network.closest = (function () {
 			}, this);
 		}
 
+
 		if (_DEBUG) 	console.log('finding the closest node to the closest cardinal vertex')
 		var start = this.last_match ? [this.last_match.vertex].concat(this._cardinal_vertices) : this._cardinal_vertices;
 		var closest_cardinal_vertex = GALAXY.util.closest_vertex(point, start);
 		if (_DEBUG) 	console.log('network closest cardinal vertex to %s ====> %s(%s of %s) -- distance %s'
 			, point, closest_cardinal_vertex, closest_cardinal_vertex.index, this.node_list.length, closest_cardinal_vertex.distanceTo(point));
 
-		var closest_cardinal_node = this.nodes[closest_cardinal_vertex.index];
+		if (!closest_cardinal_vertex.hasOwnProperty('index')){
+			throw new Error(util.format('cardinal %s has no index', closest_cardinal_vertex));
+		}
+		var closest_cardinal_node = this.get_node(closest_cardinal_vertex.index);
 		var out = closest_cardinal_node.closest(point);
 		this.last_match = out;
 		return out;

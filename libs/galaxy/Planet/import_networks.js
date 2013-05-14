@@ -105,8 +105,8 @@ GALAXY._prototypes.Planet.import_networks = function (root, detail, done) {
 	function _post_process_networks() {
 		_.each(self.networks, function (network) {
 			network.each(function (node) {
-				_.each(node.near_list, function (near, i) {
-					node.near_list[i] = self.get_node(near.index, network.detail);
+				_.each(node.near_nodes, function (near, i) {
+					node.near_nodes[i] = self.get_node(near.index, network.detail);
 				})
 
 				/**
@@ -116,10 +116,12 @@ GALAXY._prototypes.Planet.import_networks = function (root, detail, done) {
 
 				var old_vertex = self.get_vertex(node.index);
 				if (old_vertex) {
-					node.vertex = old_index;
+					node.vertex = old_vertex;
 				} else {
+				//	console.log('setting vertex %s (%s) of node %s', node.vertex, node.vertex.index,node);
 					self.set_vertex(node.vertex);
 				}
+				node.vertex.index = node.index;
 
 				//@TODO: link child, parent, influncers
 			})

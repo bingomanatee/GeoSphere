@@ -10,7 +10,6 @@ if (typeof module !== 'undefined') {
 	var _DEBUG = 0;
 	var _ECHO = false
 
-
 		;
 	var fs = require('fs');
 	var async = require('async');
@@ -31,8 +30,25 @@ if (!GALAXY._prototypes.Network) {
 	GALAXY._prototypes.Network = {};
 }
 
-GALAXY._prototypes.Network.get_node = function (index, detail) {
-	return this.planet.get_node(index, detail);
+GALAXY._prototypes.Network.get_node = function (index) {
+	if (typeof index == 'undefined') {
+		throw new Error('network.get_node index == undefiined');
+	}
+
+	if (this.nodes[index]) {
+		return this.nodes[index];
+	} else {
+		var out = _.find(this.node_list, function (node) {
+			return (node.index == index);
+		}, this);
+
+		if (out) {
+			this.nodes[index] = out;
+			return out;
+		} else {
+			throw new Error('cannot find index ' + index + ' in ' + this.toString());
+		}
+	}
 };
 
 GALAXY._prototypes.Network.import = function (file_path, cb) {
@@ -100,6 +116,7 @@ GALAXY._prototypes.Network.import = function (file_path, cb) {
 				case 'node_index':
 					var index = _int();
 					current_node.index = index;
+					current_node.vertex.index = current_node.index;
 					if (_ECHO)    console.log('  1 index %s', index);
 					self.nodes[current_node.index] = current_node;
 

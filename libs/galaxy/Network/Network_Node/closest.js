@@ -68,6 +68,9 @@ GALAXY._prototypes.Network_Node.closest = function (point, startTime) {
 			if (!tested_indexes[candidate.index]) {
 				++tests;
 				tested_indexes[candidate.index] = true;
+				if(!candidate.vertex){
+					throw new Error(util.format('cannot find vertex of %s', util.inspect(candidate)))
+				}
 				var near_distance = candidate.vertex.distanceToSquared(point);
 				if (near_distance < distance) {
 					if (_DEBUG)    console.log('test %s nearer candidate %s found ', tests, nearest);

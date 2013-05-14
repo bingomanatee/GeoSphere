@@ -34,5 +34,8 @@ if (!GALAXY._prototypes.Planet) {
  */
 
 GALAXY._prototypes.Planet.get_node = function (index, detail) {
+	if (!this.networks[detail]){
+		throw new Error('cannot get network ' + detail);
+	}
 	return this.networks[detail].nodes[index];
 };
