@@ -68,7 +68,7 @@ describe('GALAXY.Network', function () {
 
 		it('should have three neighbors in each node', function () {
 			_.each(network.nodes, function (node) {
-				node.near_list.length.should.eql(5, 'each node for a zero level tesselation should have 5 neighbors');
+				node.near_nodes.length.should.eql(5, 'each node for a zero level tesselation should have 5 neighbors');
 			});
 		})
 	})
@@ -93,7 +93,7 @@ describe('GALAXY.Network', function () {
 			var fives = 0;
 
 			var node_groups = _.groupBy(network.node_list, function (node) {
-				return node.near_list.length;
+				return node.near_nodes.length;
 			})
 			//console.log('node_groups: %s', util.inspect(node_groups));
 

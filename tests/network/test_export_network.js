@@ -24,7 +24,7 @@ var _DEBUG = false;
 var SCALE = 25;
 var WIDTH = 360 * SCALE;
 var HEIGHT = 180 * SCALE;
-var DEPTH = 8;
+var DEPTH = 5;
 
 describe('GALAXY.Network', function () {
 
@@ -58,8 +58,8 @@ describe('GALAXY.Network', function () {
 					base_node.vertex.y.should.be.within(node.vertex.y - 0.000001, node.vertex.y + 0.000001, 'comparing y');
 					base_node.vertex.z.should.be.within(node.vertex.z - 0.000001, node.vertex.z + 0.000001, 'comparing z');
 
-					var nears = _.sortBy(_.pluck(node.near_list, 'index'), _.identity);
-					var base_nears = _.sortBy(_.pluck(base_node.near_list, 'index'), _.identity);
+					var nears = _.sortBy(_.pluck(node.near_nodes, 'index'), _.identity);
+					var base_nears = _.sortBy(_.pluck(base_node.near_nodes, 'index'), _.identity);
 					nears.should.eql(base_nears, 'comparing nears');
 
 					var children = _.sortBy(_.pluck(node.children, 'index'), _.identity);

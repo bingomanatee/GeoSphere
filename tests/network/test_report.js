@@ -4,15 +4,15 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../libs/galaxy/Planet');
-var Network = require('./../libs/galaxy/Network');
+var Planet = require('./../../libs/galaxy/Planet');
+var Network = require('./../../libs/galaxy/Network');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');
 var path = require('path');
-var GALAXY = require('./../libs/galaxy/GALAXY');
+var GALAXY = require('./../../libs/galaxy/GALAXY');
 var Canvas = require('canvas');
-var test_root = path.resolve(__dirname, '../test_resources');
+var test_root = path.resolve(__dirname, '../../test_resources');
 var csv = require('csv');
 var Gate = require('gate');
 
@@ -20,7 +20,7 @@ if (_.isFunction(chai.should)) {
 	chai.should();
 }
 var _DEBUG = false;
-var DEPTH = 4;
+var DEPTH = 3;
 
 describe('GALAXY.Network', function () {
 
@@ -38,10 +38,10 @@ describe('GALAXY.Network', function () {
 		});
 
 		function ad_near(node) {
-			var near_dist = _.reduce(node.near_list, function (o, near) {
+			var near_dist = _.reduce(node.near_nodes, function (o, near) {
 				return o + near.vertex.distanceTo(node.vertex);
 			}, 0);
-			return near_dist / node.near_list.length;
+			return near_dist / node.near_nodes.length;
 		}
 
 		it('should be able to generate a CSV report', function (done) {
@@ -105,17 +105,17 @@ describe('GALAXY.Network', function () {
 				)
 
 				csv().from.array(data)
-					.to(path.resolve(test_root, 'csv/network_' + network.detail + '.csv')
+					.to(path.resolve(test_root, 'csv/network_' + network.detail + '_of_' + DEPTH + '.csv')
 					)
 					.on('end', gate.latch());
 
 				csv().from.array(child_data)
-					.to(path.resolve(test_root, 'csv/network_' + network.detail + '_children.csv')
+					.to(path.resolve(test_root, 'csv/network_' + network.detail + '_of_' + DEPTH + '_children.csv')
 					)
 					.on('end', gate.latch());
 
 				csv().from.array(parent_data)
-					.to(path.resolve(test_root, 'csv/network_' + network.detail + '_parents.csv')
+					.to(path.resolve(test_root, 'csv/network_' + network.detail + '_of_' + DEPTH + '_parents.csv')
 					)
 					.on('end', gate.latch());
 

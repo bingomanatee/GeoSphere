@@ -38,16 +38,16 @@ if (!GALAXY._prototypes.Network_Node) {
  *  ]
  */
 
-GALAXY._prototypes.Network_Node.export = function () {
+GALAXY._prototypes.Network_Node.export = function (skip_vertices) {
 	var out = [
 		['int', this.index]
 	];
 
-	out.push(['float', this.vertex.x]);
-	out.push(['float', this.vertex.y]);
-	out.push(['float', this.vertex.z]);
-	out.push(['float', this.vertex.uv.x]);
-	out.push(['float', this.vertex.uv.y]);
+		out.push(['float', this.vertex.x]);
+		out.push(['float', this.vertex.y]);
+		out.push(['float', this.vertex.z]);
+		out.push(['float', this.vertex.uv.x]);
+		out.push(['float', this.vertex.uv.y]);
 
 	out.push(['int', this.near_nodes.length]);
 	_.pluck(this.near_nodes, 'index').forEach(function (index) {

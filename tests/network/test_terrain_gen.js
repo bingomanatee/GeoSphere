@@ -4,26 +4,28 @@
 
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../libs/galaxy/Planet');
-var Network = require('./../libs/galaxy/Network');
+var Planet = require('./../../libs/galaxy/Planet');
+var Network = require('./../../libs/galaxy/Network');
 var chai = require('chai');
 var humanize = require('humanize');
 var fs = require('fs');
 var path = require('path');
-var GALAXY = require('./../libs/galaxy/GALAXY');
+var GALAXY = require('./../../libs/galaxy/GALAXY');
 var Gate = require('gate');
 var Simplex = require('simplex-noise');
+var async = require("async");
 
 if (_.isFunction(chai.should)) {
 	chai.should();
 }
 var _DEBUG = false;
 
-var SCALE = 1;
+var SCALE = 3;
 var WIDTH = 360 * SCALE;
 var HEIGHT = 180 * SCALE;
+var DEPTH = 5;
 
-var test_root = path.resolve(__dirname, '../test_resources');
+var test_root = path.resolve(__dirname, '../../test_resources');
 
 var colors = [
 	new THREE.Color().setRGB(1, 0, 0),
@@ -52,12 +54,21 @@ function draw_noise(network) {
 	});
 }
 
-function g_color(g) {
+var PCT_OCEAN = 0.6;
+var sea_level = 255 * PCT_OCEAN;
+var remainder = 255 - sea_level;
 
-	if (g < 100) {
-		return [0, GALAXY.util.channel(g / 2), g, 1]
+function g_color(g) {
+	var g_range;
+	if (g < sea_level) {
+		g_range = g * 255 / sea_level;
+
+		return [0, GALAXY.util.channel(g_range / 2), GALAXY.util.channel(g_range), 1]
+	} else {
+		g_range = g - sea_level;
+		g_range *= 255 / remainder;
+		return [ GALAXY.util.channel(g_range * 1.2), GALAXY.util.channel(g_range * 0.8), GALAXY.util.channel(g_range / 2), 1];
 	}
-	return [ GALAXY.util.channel(g * 1.2), GALAXY.util.channel(g * 0.8), GALAXY.util.channel(g / 2), 1];
 }
 
 function draw_terrain(network) {
@@ -146,14 +157,14 @@ function simplex_noise(terrain, simplexes) {
 
 describe('GALAXY.Network', function () {
 
-	describe('deep linking networks', function () {
+	describe('terrain generation', function () {
 
 		var planet;
 		var simplexes;
 
 		before(function () {
 			planet = new Planet();
-			planet.init_iso(7);
+			planet.init_iso(DEPTH);
 			planet.init_networks();
 			simplexes = [
 				{
@@ -162,48 +173,48 @@ describe('GALAXY.Network', function () {
 					scale:           32,
 					weight:          16
 				},
-				{
+			/*	{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           16,
 					weight:          32
-				},
+				}, */
 				{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           8,
 					weight:          32
 				},
-				{
+			/*	{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           4,
 					weight:          64
-				},
+				}, */
 				{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           2,
 					weight:          128
 				},
-				{
+			/*	{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           1,
 					weight:          128
-				},
+				}, */
 				{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           0.5,
 					weight:          128
 				},
-				{
+		/*		{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
 					scale:           0.25,
 					weight:          128
-				},
+				}, */
 				{
 					simplex:         new Simplex(Math.random),
 					simplex_opacity: new Simplex(Math.random),
@@ -255,36 +266,23 @@ describe('GALAXY.Network', function () {
 
 		it.only('should be able to generate simplex noise and simplify upwards', function (done) {
 
-			var networks = planet.networks.slice(0).reverse();
-			var gate = Gate.create();
-
-			networks.forEach(function (network) {
-
-				simplex_noise(network, simplexes);
-				var canvas = draw_noise(network);
-				GALAXY.util.canvas_to_png(canvas, path.resolve(test_root, 'terrain/terrain_noise_' + network.detail + '.png'), gate.latch());
-
-			})
-
-		/*	networks = planet.networks.slice(1);
-			networks.forEach(function (network) {
-				network.simplify(function __iter(node, child) {
-						node.data.heights.push(child.data.height);
-					},
-					function __init(node) {
-						node.data.heights = [];
-					},
-					function __final(node) {
-						node.data.height = GALAXY.util.stat.average(node.data.heights);
+			var functions = _.map(planet.networks
+				.slice(0).reverse(), function (network){
+				return function(cb){
+					function callback(){
+						console.log('done mapping network %s', network);
+						setTimeout(cb, 2000);
 					}
-				);
-				var canvas = draw_noise(network);
-				GALAXY.util.canvas_to_png(canvas, path.resolve(test_root,
-					'terrain/terrain_noise_' + network.detail + '_from_child.png'), gate.latch());
+					console.log('mapping network %s', network);
+					simplex_noise(network, simplexes);
+					var canvas = draw_noise(network);
+					GALAXY.util.canvas_to_png(canvas
+						, path.resolve(test_root, 'terrain/terrain_noise_' + network.detail + '.png')
+						, callback);
+				}
+			});
 
-			});*/
-
-			gate.await(done);
+			async.series(functions, done);
 		});
 	})
 });
