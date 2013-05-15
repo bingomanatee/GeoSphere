@@ -21,24 +21,11 @@ if (_.isFunction(chai.should)) {
 var _DEBUG = false;
 
 var DETAIL = 7;
-var SCALE = 3;
+var SCALE = 5;
 var WIDTH = 360 * SCALE;
 var HEIGHT = 180 * SCALE;
 
 var test_root = path.resolve(__dirname, '../../test_resources');
-
-
-function draw_noise(network) {
-	return GALAXY.util.draw(WIDTH, HEIGHT, function (x, y) {
-		var xs = x / SCALE;
-		var ys = y / SCALE;
-		ys -= 90;
-		var point3 = THREE.utils.latLonToVertex(ys, xs, true);
-		var node = network.closest(point3);
-		var g = GALAXY.util.channel(node.data.height);
-		return g_color(g);
-	});
-}
 
 var PCT_OCEAN = 0.6;
 var sea_level = 255 * PCT_OCEAN;
@@ -59,22 +46,39 @@ function g_color(g) {
 
 function draw_terrain(network) {
 	console.log('drawing terrain for network %s', network);
-	return GALAXY.util.draw(WIDTH, HEIGHT, function (x, y) {
-		var xs = x / SCALE;
-		var ys = y / SCALE;
-		ys -= 90;
-		var point3 = THREE.utils.latLonToVertex(ys, xs, true);
-		var node = network.closest(point3);
+	var canvas = network.draw_by_node(WIDTH, HEIGHT, function (node, canvas, ctx) {
 		var g = GALAXY.util.channel(node.data.height);
-		if (0 == (x % 50) == (y % 50)) {
-			if (_DEBUG) {
-				console.log('x: %s, y: %s, xs: %s, ys: %s, point: %s, closest node %s, g: %s',
-					x, y, xs, ys, point3, node, g);
+		var color = g_color(g);
+		ctx.fillStyle(color.getStyle());
+
+		var uvs_scaled = _.map(this.node_to_triangles(), function (triangles) {
+			return _.map(triangles, function (triangle) {
+				if (!triangle._uvs_scaled) {
+					triangle._uvs_scaled = _.map(triangle, function(vertex){
+						if (!vertex._uv_scaled){
+							vertex._uv_scaled = [vertex.uv.x * WIDTH, vertex.uv.y * HEIGHT];
+						}
+						return vertex._uv_scaled;
+					});
+				}
+				return triangle._uvs_scaled;
+			});
+		})
+
+		ctx.beginPath()
+		uvs_scaled.forEach(function(uv, i){
+			if (i){
+				ctx.moveTo(uv.x, uv.y);
+			} else {
+				ctx.lineTo(uv.x, uv.y);
 			}
-		}
-		return g_color(g);
+		});
+		ctx.closePath();
+		ctx.fill();
+
 	});
 
+	return canvas;
 }
 
 function _sum(data) {
@@ -213,7 +217,7 @@ describe('GALAXY.Network', function () {
 
 		}) // end before
 
-		it('should be able to import networks', function(done){
+		it('should be able to import networks', function (done) {
 			var import_root = path.resolve(test_root, 'network/exports/detail_' + DETAIL);
 			planet.import_networks(import_root, DETAIL, done);
 		})
@@ -221,15 +225,16 @@ describe('GALAXY.Network', function () {
 		it('should be able to generate simplex noise', function (done) {
 
 			var functions = _.map(planet.networks
-				.slice(0).reverse(), function (network){
-				return function(cb){
-					function callback(){
+				.slice(0).reverse(), function (network) {
+				return function (cb) {
+					function callback() {
 						console.log('done mapping network %s', network);
 						setTimeout(cb, 2000);
 					}
+
 					console.log(' =========== mapping network %s ==========', network);
 					simplex_noise(network, simplexes);
-					var canvas = draw_noise(network);
+					var canvas = draw_terrain(network);
 					GALAXY.util.canvas_to_png(canvas
 						, path.resolve(test_root, 'terrain/simplex_' + network.detail + '.png')
 						, callback);

@@ -47,6 +47,14 @@ THREE.Vector3.prototype.toString = function (uv, spherical) {
 	].join(', ') + ')';
 
 };
+
+THREE.Vector3.prototype.mid = function(p2){
+	var mid = this.clone();
+	mid.add(p2);
+	mid.multiplyScalar(0.5);
+	return mid;
+};
+
 THREE.Vector2.prototype.toString = function () {
 	return '(' + [
 		_p2(this.x),
