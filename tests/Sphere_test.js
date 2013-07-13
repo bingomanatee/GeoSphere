@@ -5,6 +5,7 @@ var _ = require('underscore');
 var Sphere = require('./../lib/Sphere');
 var THREE = require('three');
 var _DEBUG = false;
+var canvas_to_file = require('./../lib/util/canvas_to_file');
 
 /* *********************** TEST SCAFFOLDING ********************* */
 
@@ -26,14 +27,53 @@ function _c(n) {
 }
 
 function _color(vertex) {
-	//console.log('colors based on %s, %s, %s', vertex.x, vertex.y, vertex.z);
-	var out = new THREE.Color().setRGB(_c(vertex.x), _c(vertex.y), _c(vertex.z));
-//	console.log(' ... %s', out.getStyle());
-	return out;
+	return new THREE.Color().setRGB(_c(vertex.x), _c(vertex.y), _c(vertex.z));
 }
 
-var SCALE = 2;
+var SCALE = 3;
 var W = 360 * SCALE, H = 180 * SCALE;
+
+function _draw_map(n, t) {
+	var sphere = new Sphere(n);
+	_.each(sphere.vertices(), function (v) {
+		sphere.vertex_data(v.index, 'color', _color(v));
+	});
+	var t1 = new Date().getTime();
+	sphere.draw_map(W, H, function (err, c) {
+		canvas_to_file(c, path.resolve(__dirname, '.out/draw_map_' + n + '.png'), function () {
+			console.log('drawing map for sphere %s , %s seconds', n, (new Date().getTime() - t1) / 1000);
+			t.end();
+		});
+	});
+}
+
+function _draw(n, t) {
+	var sphere = new Sphere(n);
+	_.each(sphere.vertices(), function (v) {
+		sphere.vertex_data(v.index, 'color', _color(v));
+	});
+	var t1 = new Date().getTime();
+	sphere.draw(W, H, function (err, c) {
+		canvas_to_file(c, path.resolve(__dirname, '.out/draw_' + n + '.png'), function () {
+			console.log('drawing combined sphere %s, %s seconds', n, (new Date().getTime() - t1) / 1000);
+			t.end();
+		})
+	});
+}
+
+function _draw_triangles(n, t) {
+	var sphere = new Sphere(n);
+	_.each(sphere.vertices(), function (v) {
+		sphere.vertex_data(v.index, 'color', _color(v));
+	});
+	var t1 = new Date().getTime();
+	sphere.draw_triangles(W, H, function (err, c) {
+		canvas_to_file(c, path.resolve(__dirname, '.out/draw_triangles_' + n + '.png'), function () {
+			console.log('drawing sphere %s, %s seconds', n, (new Date().getTime() - t1) / 1000);
+			t.end();
+		})
+	});
+}
 
 /* ************************* TESTS ****************************** */
 var TIMEOUT = 1000 * 60 * 80;
@@ -108,97 +148,55 @@ tap.test('Sphere', {timeout: TIMEOUT}, function (t) {
 		t2.end();
 	});
 
-	t.test('draw', function (t3) {
-		var sphere0 = new Sphere(0);
-		_.each(sphere0.vertices(), function (v) {
-			sphere0.vertex_data(v.index, 'color', _color(v));
-		});
-
-		sphere0.draw(W, H, path.resolve(__dirname, '.out/draw_0.png'), function () {
-
-			var sphere1 = new Sphere(1);
-			_.each(sphere1.vertices(), function (v) {
-				sphere1.vertex_data(v.index, 'color', _color(v));
-			});
-
-			sphere1.draw(W, H, path.resolve(__dirname, '.out/draw_1.png'), function () {
-				var sphere2 = new Sphere(2);
-				_.each(sphere2.vertices(), function (v) {
-					sphere2.vertex_data(v.index, 'color', _color(v));
-				});
-
-				sphere2.draw(W, H, path.resolve(__dirname, '.out/draw_2.png'), function () {
-					var sphere3 = new Sphere(3);
-					_.each(sphere3.vertices(), function (v) {
-						sphere3.vertex_data(v.index, 'color', _color(v));
-					});
-
-					sphere3.draw(W, H, path.resolve(__dirname, '.out/draw_3.png'), function () {
-						t3.end();
-					});
-				});
-			});
-		});
-
+	t.test('draw 0', {timeout: 60 * 1000}, function (tt) {
+		_draw(0, tt);
+	});
+	t.test('draw 1', {timeout: 60 * 1000}, function (tt) {
+		_draw(1, tt);
+	});
+	t.test('draw 2', {timeout: 60 * 1000}, function (tt) {
+		_draw(2, tt);
+	});
+	t.test('draw 3', {timeout: 60 * 1000}, function (tt) {
+		_draw(3, tt);
+	});
+	t.test('draw 4', {timeout: 60 * 1000}, function (tt) {
+		_draw(4, tt);
 	});
 
-	t.test('draw_map', {timeout: TIMEOUT}, function (t5) {
-		var sphere0 = new Sphere(0);
-		_.each(sphere0.vertices(), function (v) {
-			sphere0.vertex_data(v.index, 'color', _color(v));
-		});
-
-		var start = new Date().getTime();
-		var tt = start;
-
-		sphere0.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_0.png'), function () {
-			var ttt = new Date().getTime();
-			console.log('time 0: %s (%s) ', ttt - start, ttt - tt);
-			tt = ttt;
-
-			var sphere1 = new Sphere(1);
-			_.each(sphere1.vertices(), function (v) {
-				sphere1.vertex_data(v.index, 'color', _color(v));
-			});
-
-			sphere1.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_1.png'), function () {
-				var ttt = new Date().getTime();
-				console.log('time 1: %s (%s) ', ttt - start, ttt - tt);
-				tt = ttt;
-
-				var sphere2 = new Sphere(2);
-				_.each(sphere2.vertices(), function (v) {
-					sphere2.vertex_data(v.index, 'color', _color(v));
-				});
-
-				sphere2.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_2.png'), function () {
-					var ttt = new Date().getTime();
-					console.log('time 2: %s (%s) ', ttt - start, ttt - tt);
-					tt = ttt;
-
-					var sphere3 = new Sphere(3);
-					_.each(sphere3.vertices(), function (v) {
-						sphere3.vertex_data(v.index, 'color', _color(v));
-					});
-
-					sphere3.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_3.png'), function () {
-
-						var ttt = new Date().getTime();
-						console.log('time 3: %s (%s) ', ttt - start, ttt - tt);
-						tt = ttt;
-
-							t5.end();
-					});
-				});
-			});
-		});
-
+	t.test('draw triangles 0', {timeout: 60 * 1000}, function (tt) {
+		_draw_triangles(0, tt);
+	});
+	t.test('draw triangles 1', {timeout: 60 * 1000}, function (tt) {
+		_draw_triangles(1, tt);
+	});
+	t.test('draw triangles 2', {timeout: 60 * 1000}, function (tt) {
+		_draw_triangles(2, tt);
+	});
+	t.test('draw triangles 3', {timeout: 60 * 1000}, function (tt) {
+		_draw_triangles(3, tt);
+	});
+	t.test('draw triangles 4', {timeout: 60 * 1000}, function (tt) {
+		_draw_triangles(4, tt);
 	});
 
+	t.test('draw map 0', {timeout: 60 * 1000}, function (tt) {
+		_draw_map(0, tt);
+	});
+	t.test('draw map 1', {timeout: 60 * 1000}, function (tt) {
+		_draw_map(1, tt);
+	});
+	t.test('draw map 2', {timeout: 60 * 1000}, function (tt) {
+		_draw_map(2, tt);
+	});
+	t.test('draw map 3', {timeout: 60 * 1000}, function (tt) {
+		_draw_map(3, tt);
+	});
+	t.test('draw map 4', {timeout: 60 * 1000}, function (tt) {
+		_draw_map(4, tt);
+	});
 	t.test('nearest', function (t4) {
 		var sphere0 = new Sphere(0);
-		var output = [];
-		var opb = [];
 
 		_.range(-1, 1.01, 1).forEach(function (x) {
 			_.range(-1, 1.01, 1).forEach(function (y) {
