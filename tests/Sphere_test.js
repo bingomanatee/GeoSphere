@@ -8,12 +8,12 @@ var _DEBUG = false;
 
 /* *********************** TEST SCAFFOLDING ********************* */
 
-function _brute_force_closest_point(s, x, y, z){
+function _brute_force_closest_point(s, x, y, z) {
 	var p3 = new THREE.Vector3(x, y, z);
 
-	return _.reduce(s.vertices(), function(out, v){
+	return _.reduce(s.vertices(),function (out, v) {
 		var d = v.distanceToSquared(p3);
-		if (out && out.d < d){
+		if (out && out.d < d) {
 			return out;
 		} else {
 			return {d: d, vertex: v};
@@ -21,10 +21,24 @@ function _brute_force_closest_point(s, x, y, z){
 	}, null).vertex;
 }
 
+function _c(n) {
+	return ((1 + n) / 2);
+}
+
+function _color(vertex) {
+	//console.log('colors based on %s, %s, %s', vertex.x, vertex.y, vertex.z);
+	var out = new THREE.Color().setRGB(_c(vertex.x), _c(vertex.y), _c(vertex.z));
+//	console.log(' ... %s', out.getStyle());
+	return out;
+}
+
+var SCALE = 2;
+var W = 360 * SCALE, H = 180 * SCALE;
+
 /* ************************* TESTS ****************************** */
+var TIMEOUT = 1000 * 60 * 80;
 
-tap.test('Sphere', function (t) {
-
+tap.test('Sphere', {timeout: TIMEOUT}, function (t) {
 	t.test('constructor', function (t2) {
 		var sphere0 = new Sphere(0);
 		t2.equal(sphere0.vertices().length, 12, '12 points on a sphere depth 0');
@@ -96,11 +110,86 @@ tap.test('Sphere', function (t) {
 
 	t.test('draw', function (t3) {
 		var sphere0 = new Sphere(0);
-		sphere0.draw(500, 500, path.resolve(__dirname, 'test0.png'), function () {
+		_.each(sphere0.vertices(), function (v) {
+			sphere0.vertex_data(v.index, 'color', _color(v));
+		});
+
+		sphere0.draw(W, H, path.resolve(__dirname, '.out/draw_0.png'), function () {
 
 			var sphere1 = new Sphere(1);
-			sphere1.draw(500, 500, path.resolve(__dirname, 'test1.png'), function () {
-				t3.end();
+			_.each(sphere1.vertices(), function (v) {
+				sphere1.vertex_data(v.index, 'color', _color(v));
+			});
+
+			sphere1.draw(W, H, path.resolve(__dirname, '.out/draw_1.png'), function () {
+				var sphere2 = new Sphere(2);
+				_.each(sphere2.vertices(), function (v) {
+					sphere2.vertex_data(v.index, 'color', _color(v));
+				});
+
+				sphere2.draw(W, H, path.resolve(__dirname, '.out/draw_2.png'), function () {
+					var sphere3 = new Sphere(3);
+					_.each(sphere3.vertices(), function (v) {
+						sphere3.vertex_data(v.index, 'color', _color(v));
+					});
+
+					sphere3.draw(W, H, path.resolve(__dirname, '.out/draw_3.png'), function () {
+						t3.end();
+					});
+				});
+			});
+		});
+
+	});
+
+	t.test('draw_map', {timeout: TIMEOUT}, function (t5) {
+		var sphere0 = new Sphere(0);
+		_.each(sphere0.vertices(), function (v) {
+			sphere0.vertex_data(v.index, 'color', _color(v));
+		});
+
+		var start = new Date().getTime();
+		var tt = start;
+
+		sphere0.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_0.png'), function () {
+			var ttt = new Date().getTime();
+			console.log('time 0: %s (%s) ', ttt - start, ttt - tt);
+			tt = ttt;
+
+			var sphere1 = new Sphere(1);
+			_.each(sphere1.vertices(), function (v) {
+				sphere1.vertex_data(v.index, 'color', _color(v));
+			});
+
+			sphere1.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_1.png'), function () {
+				var ttt = new Date().getTime();
+				console.log('time 1: %s (%s) ', ttt - start, ttt - tt);
+				tt = ttt;
+
+				var sphere2 = new Sphere(2);
+				_.each(sphere2.vertices(), function (v) {
+					sphere2.vertex_data(v.index, 'color', _color(v));
+				});
+
+				sphere2.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_2.png'), function () {
+					var ttt = new Date().getTime();
+					console.log('time 2: %s (%s) ', ttt - start, ttt - tt);
+					tt = ttt;
+
+					var sphere3 = new Sphere(3);
+					_.each(sphere3.vertices(), function (v) {
+						sphere3.vertex_data(v.index, 'color', _color(v));
+					});
+
+					sphere3.draw_map(W, H, path.resolve(__dirname, '.out/draw_map_3.png'), function () {
+
+						var ttt = new Date().getTime();
+						console.log('time 3: %s (%s) ', ttt - start, ttt - tt);
+						tt = ttt;
+
+							t5.end();
+					});
+				});
 			});
 		});
 
@@ -118,17 +207,17 @@ tap.test('Sphere', function (t) {
 					var bfp = _brute_force_closest_point(sphere0, x, y, z);
 					var from_p = new THREE.Vector3(x, y, z);
 
-						var cp_dist = from_p.distanceToSquared(p);
-						var bfp_dist = from_p.distanceToSquared(bfp);
-						if (cp_dist != bfp_dist){
-							console.log('bad find: from %s, %s, %s the brute force point %s ' +
-								'is closer than the closest_point %s (closest_dist %s, bf dist %s)',
-								x, y, z, util.inspect(bfp), util.inspect(p), cp_dist, bfp_dist)
+					var cp_dist = from_p.distanceToSquared(p);
+					var bfp_dist = from_p.distanceToSquared(bfp);
+					if (cp_dist != bfp_dist) {
+						console.log('bad find: from %s, %s, %s the brute force point %s ' +
+							'is closer than the closest_point %s (closest_dist %s, bf dist %s)',
+							x, y, z, util.inspect(bfp), util.inspect(p), cp_dist, bfp_dist)
 
-						}
+					}
 
-						t.deepEqual( cp_dist, bfp_dist
-							, 'found a point equal distance to the closest point. ');
+					t.deepEqual(cp_dist, bfp_dist
+						, 'found a point equal distance to the closest point. ');
 
 				})
 			})
