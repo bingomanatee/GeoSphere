@@ -1,0 +1,95 @@
+{
+	"metadata": {
+		"version": 4,
+		"type": "object",
+		"generator": "ObjectExporter"
+	},
+	"geometries": [
+		{
+			"type": "SphereGeometry",
+			"radius": 695500,
+			"widthSegments": 32,
+			"heightSegments": 16,
+			"phiStart": 0,
+			"phiLength": 6.28,
+			"thetaStart": 0,
+			"thetaLength": 3.14
+		},
+		{
+			"type": "CubeGeometry",
+			"width": 10,
+			"height": 10,
+			"depth": 10,
+			"widthSegments": 1,
+			"heightSegments": 1,
+			"depthSegments": 1
+		}],
+	"materials": [
+		{
+			"name": "sunMaterial",
+			"type": "MeshPhongMaterial",
+			"color": 16758052,
+			"ambient": 16777215,
+			"emissive": 0,
+			"specular": 1118481,
+			"shininess": 30,
+			"opacity": 1,
+			"transparent": false,
+			"wireframe": false
+		},
+		{
+			"type": "MeshPhongMaterial",
+			"color": 16777215,
+			"ambient": 16777215,
+			"emissive": 0,
+			"specular": 1118481,
+			"shininess": 30,
+			"opacity": 1,
+			"transparent": false,
+			"wireframe": false
+		},
+		{
+			"type": "MeshPhongMaterial",
+			"color": 16777215,
+			"ambient": 16777215,
+			"emissive": 0,
+			"specular": 1118481,
+			"shininess": 30,
+			"opacity": 1,
+			"transparent": false,
+			"wireframe": false
+		}],
+	"object": {
+		"type": "Scene",
+		"children": [
+			{
+				"name": "sun",
+				"type": "Mesh",
+				"position": [0,0,0],
+				"rotation": [0,0,0],
+				"scale": [1,1,1],
+				"geometry": 0,
+				"material": 0,
+				"children": [
+					{
+						"name": "earth_center",
+						"type": "Mesh",
+						"position": [149598000,0],
+						"rotation": [0,0,0],
+						"scale": [0.1,0.1,0.1],
+						"geometry": 1,
+						"material": 1,
+						"children": [
+							{
+								"name": "earth_counter_rotation",
+								"type": "Mesh",
+								"position": [0,0,0],
+								"rotation": [0,0,0],
+								"scale": [0.1,0.1,0.1],
+								"geometry": 1,
+								"material": 1
+							}]
+					}]
+			}]
+	}
+}

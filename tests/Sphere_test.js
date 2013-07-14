@@ -69,7 +69,7 @@ function _draw_triangles(n, t) {
 	var t1 = new Date().getTime();
 	sphere.draw_triangles(W, H, function (err, c) {
 		canvas_to_file(c, path.resolve(__dirname, '.out/draw_triangles_' + n + '.png'), function () {
-			console.log('drawing sphere %s, %s seconds', n, (new Date().getTime() - t1) / 1000);
+			console.log('drawing face-based sphere %s, %s seconds', n, (new Date().getTime() - t1) / 1000);
 			t.end();
 		})
 	});
