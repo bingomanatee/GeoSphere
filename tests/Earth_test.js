@@ -134,7 +134,7 @@ tap.test('Earth', {timeout: 1000 * 60 * 3}, function (t) {
 	});
 
 	t.test('sunlight simulation', {skip: false, timeout: 1000 * 60 * 3}, function (ss) {
-		var e = new Earth();
+		var e = new Earth(3);
 		e.simulation();
 		var SCALE = 2;
 		var W = 360 * SCALE, H = 180 * SCALE;
@@ -153,6 +153,7 @@ tap.test('Earth', {timeout: 1000 * 60 * 3}, function (t) {
 				var ctx = c.getContext('2d');
 				var imageData = ctx.getImageData(0, 0, 720, 360);
 				var offset = 0;
+				return l();
 				var buffer = _.reduce(imageData.data, function(buffer, f, i){
 					if (i % 4 == 3) {
 						return buffer;
