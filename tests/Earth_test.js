@@ -12,6 +12,7 @@ var fs = require('fs');
 /* *********************** TEST SCAFFOLDING ********************* */
 
 var ORDER = 'XZY';
+var FRAMES_PER_DAY = 4;
 
 function about(a, b, diff) {
 	return Math.abs(a - b) <= diff;
@@ -141,35 +142,17 @@ tap.test('Earth', {timeout: 1000 * 60 * 3}, function (t) {
 		var gate = Gate.create();
 
 		// because the earth has a radius > 1, to collect data a new Iso is used.
-		var earth_planet = new Planet(3);
 		var planet_iso = new THREE.IcosahedronGeometry(e.EARTH_RADIUS, 3);
 		var planet_mesh = new THREE.Mesh(planet_iso);
 
 		e.earth_sphere.add(planet_mesh);
 
-		_.range(0, 366).forEach(function (day) {
-			var l =  gate.latch();
-			e.write_illumination(path.resolve(__dirname, '.solar_input/sunlight'), function(err, c){
-				var ctx = c.getContext('2d');
-				var imageData = ctx.getImageData(0, 0, 720, 360);
-				var offset = 0;
-				return l();
-				var buffer = _.reduce(imageData.data, function(buffer, f, i){
-					if (i % 4 == 3) {
-						return buffer;
-					}
-					buffer.writeUInt8(f, offset);
-					++offset;
-					return buffer;
-				}, new Buffer(720 * 360 * 3));
-				var binary_file = path.resolve(__dirname, '.solar_input/frames/img.' + day + '.0.bin');
-				if (!(day % 10)) console.log('writing binary file: %s', binary_file);
-				fs.writeFile(binary_file, buffer, l);
-			}, day, 0);
-		})
+		_.range(0, 366, 1/FRAMES_PER_DAY).forEach(function (day) {
+			e.write_illumination(path.resolve(__dirname, '../test_resources/sunlight'),
+				gate.latch(), day, 360, 180);
+		});
 
-		gate.await(
-			function () {
+		gate.await(function () {
 				ss.end();
 			});
 	})
