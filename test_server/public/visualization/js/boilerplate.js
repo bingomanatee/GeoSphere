@@ -97,5 +97,5 @@ function render() {
 	renderer.render( scene, camera );
 	var vector = new THREE.Vector3();
 	vector.setPositionFromMatrix(earth.earth_sphere.matrixWorld);
-	camera.lo5okAt(vector);
+	camera.lookAt(vector);
 }

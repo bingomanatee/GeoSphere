@@ -6,23 +6,26 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 
 
-    <script src="/sphere_viewer/vendor/three.min.js"></script>
+    <script src="/sphere_viewer/js/vendor/three.min.js"></script>
 
-    <script src="/sphere_viewer/video_viewer_files/ConvolutionShader.js"></script>
-    <script src="/sphere_viewer/video_viewer_files/CopyShader.js"></script>
+    <script src="/sphere_viewer/js/ConvolutionShader.js"></script>
+    <script src="/sphere_viewer/js/CopyShader.js"></script>
 
-    <script src="/sphere_viewer/video_viewer_files/EffectComposer.js"></script>
-    <script src="/sphere_viewer/video_viewer_files/RenderPass.js"></script>
-    <script src="/sphere_viewer/video_viewer_files/MaskPass.js"></script>
-    <script src="/sphere_viewer/video_viewer_files/BloomPass.js"></script>
-    <script src="/sphere_viewer/video_viewer_files/ShaderPass.js"></script>
+    <script src="/sphere_viewer/js/EffectComposer.js"></script>
+    <script src="/sphere_viewer/js/RenderPass.js"></script>
+    <script src="/sphere_viewer/js/MaskPass.js"></script>
+    <script src="/sphere_viewer/js/BloomPass.js"></script>
+    <script src="/sphere_viewer/js/ShaderPass.js"></script>
 
 </head>
 <body style="height: 100%">
 
-<video id="video" autoplay="autoplay" loop="" style="display:block; position:  absolute; top:  0;right: 0">
-    <source src="/video/movie.mp4" type="video/mp4; codecs=&quot;avc1.42E01E, mp4a.40.2&quot;">
+<video id="video" autoplay="autoplay" loop="0" style="display:block; position:  absolute; top:  0;right: 0">
+    <source src="/video/normal_test.mp4" type="video/mp4; codecs=&quot;avc1.42E01E, mp4a.40.2&quot;">
 </video>
+<div id="time"
+     style="display: block; width:  250px; height:  30px; position:  absolute; background-color: white; bottom:  0;
+      left:  0;"></div>
 
 <!-- three.js container -->
 <!-- info on screen display -->

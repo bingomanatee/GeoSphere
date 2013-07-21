@@ -9,3 +9,4 @@
 /test_resources/
 /tests/.out/
 /tests/.solar_input/sunlight/
+npm-debug.log
