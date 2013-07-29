@@ -22,7 +22,8 @@
     "should": "1.2.1",
     "gate": "~0.3.0",
     "csv": "~0.3.0",
-    "node-static": "~0.7.0"
+    "node-static": "~0.7.0",
+    "tap": "~0.4.3"
   },
   "test": "mocha tests -R spec"
 }
