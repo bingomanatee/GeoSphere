@@ -8,6 +8,8 @@ var Gate = require('gate');
 var Planet = require('./../lib/Planet');
 var THREE = require('three');
 
+var SCALE = 4;
+
 /* *********************** TEST SCAFFOLDING ********************* */
 
 /* ************************* TESTS ****************************** */
@@ -83,11 +85,11 @@ tap.test('poll icosphere', {skip: true}, function (t) {
     t.end();
 })
 
-tap.test('draw tessellated map of height', {timeout: 200 * 1000, skip: false}, function (t) {
+tap.test('draw tessellated map of height', {timeout: 2000 * 1000, skip: false}, function (t) {
 
     var draw_path = path.resolve(__dirname, './../test_resources/earth_tesselated.png');
     console.log('drawing %s', draw_path);
-    var planet = new Planet(5);
+    var planet = new Planet(7);
     var done = 0;
     var last_done = 0;
 
@@ -112,16 +114,18 @@ tap.test('draw tessellated map of height', {timeout: 200 * 1000, skip: false}, f
 
                 // console.log('vertex: %s: u: %s, v: %s, height: %s',  vertex.index, vertex.uv.x, vertex.uv.y, height);
                 if (height > 10000) {
+                    chroma = new THREE.Color().setRGB(0, 0.2, 1);
+                } else {
 
-                    height = 0;
+                    var chroma = Math.min(1, Math.max(0, height / 6000));
+                    chroma = Math.sqrt(chroma);
+                    chroma = new THREE.Color().setHSL(chroma, 1, chroma);
                 }
-                ++done;
-                var chroma = Math.min(1, Math.max(0, height / 1000));
                 if (Math.floor(done / 1000) > last_done) {
                     last_done = Math.floor(done / 1000);
                     console.log('%s done.', done);
                 }
-               // chroma = Math.sqrt(chroma);
+                ++done;
 
                 var color = new THREE.Color().setRGB(chroma, chroma, chroma);
                 planet.vertex_data(i, 'color', chroma);
@@ -135,7 +139,7 @@ tap.test('draw tessellated map of height', {timeout: 200 * 1000, skip: false}, f
 
         gate.await(function () {
             console.log('drawing....');
-            planet.draw_triangles(720, 360, draw_path, function () {
+            planet.draw_triangles(360 * SCALE, 180 * SCALE, draw_path, function () {
                 t.end();
             })
         })
