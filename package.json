@@ -4,7 +4,7 @@
   "private": false,
   "scripts": {},
   "dependencies": {
-    "three": ">= 0.56",
+    "three": ">= 0.58.9",
     "underscore": ">=1.4.3",
     "async": "0.1.22",
     "canvas": "1.0.3",

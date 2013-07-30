@@ -48,7 +48,42 @@ tap.test('range of data', {timeout: 2000 * 1000, skip: true}, function (t) {
     })
 }) // end tap.test 2
 
-tap.test('draw tesselated map of height', {timeout: 200 * 1000}, function (t) {
+tap.test('draw map of UVs', {timeout: 200 * 1000, skip: false}, function (t) {
+
+    var draw_path = path.resolve(__dirname, './../test_resources/earth_uv.png');
+    console.log('drawing %s', draw_path);
+    var planet = new Planet(4);
+    planet.vertices().forEach(function (v, i) {
+        console.log('vertex %s index: %s', i, v.index);
+        var c = new THREE.Color();
+        c.setRGB(v.uv.x, v.uv.y, 1);
+        planet.vertex_data(v.index, 'color', c);
+        if (i < 20) console.log('vertex: %s, %s, %s, %s, %s, %s', v.index, v.x, v.y, v.z, v.uv.x, v.uv.y);
+
+    })
+    planet.draw_triangles(720, 360, draw_path, function () {
+        t.end();
+    });
+
+});
+
+tap.test('poll icosphere', {skip: true}, function (t) {
+    var planet = new Planet(3);
+
+    console.log('iso: %s', util.inspect(planet.iso));
+
+    planet.vertices().forEach(function (vertex, i) {
+        console.log('vertex %s , %s, %s, %s, %s, %s', vertex.index, vertex.x, vertex.y, vertex.z, vertex.uv.x, vertex.uv.y);
+    });
+
+    planet.iso.faces.forEach(function (face, i) {
+        console.log('face: %s, %s, %s, %s, %s', i, face.a, face.b, face.c, face.d);
+    });
+
+    t.end();
+})
+
+tap.test('draw tessellated map of height', {timeout: 200 * 1000, skip: false}, function (t) {
 
     var draw_path = path.resolve(__dirname, './../test_resources/earth_tesselated.png');
     console.log('drawing %s', draw_path);
@@ -69,23 +104,27 @@ tap.test('draw tesselated map of height', {timeout: 200 * 1000}, function (t) {
         var tasks = planet.vertices().length;
 
         planet.vertices().forEach(function (vertex, i) {
-            //   console.log('getting vertex %s height', vertex.index);
             var l = gate.latch();
             var task = tasks;
             index.uv_height(vertex.uv.x, vertex.uv.y, function (err, height) {
                 if (err) throw err;
-                if (false) console.log('vertex: %s of %s, u: %s, v: %s, height: %s',
-                    i + 1, task, vertex.uv.x, vertex.uv.y, height);
-                if (height > 10000) height = 0;
+                height = parseInt(height);
 
+                // console.log('vertex: %s: u: %s, v: %s, height: %s',  vertex.index, vertex.uv.x, vertex.uv.y, height);
+                if (height > 10000) {
+
+                    height = 0;
+                }
                 ++done;
+                var chroma = Math.min(1, Math.max(0, height / 1000));
                 if (Math.floor(done / 1000) > last_done) {
                     last_done = Math.floor(done / 1000);
                     console.log('%s done.', done);
                 }
-                var chroma = Math.min(1, Math.max(0, height / 1000));
+               // chroma = Math.sqrt(chroma);
+
                 var color = new THREE.Color().setRGB(chroma, chroma, chroma);
-                planet.vertex_data(vertex.index, 'color', color);
+                planet.vertex_data(i, 'color', chroma);
                 --tasks;
 
                 if (tasks < 1) console.log('all done');
@@ -97,11 +136,6 @@ tap.test('draw tesselated map of height', {timeout: 200 * 1000}, function (t) {
         gate.await(function () {
             console.log('drawing....');
             planet.draw_triangles(720, 360, draw_path, function () {
-                var rows = _.sortBy(_.map(_.keys(index._r), _.identity), function (value) {
-                    return parseInt(value);
-                });
-
-                console.log(' %s rows: %s', rows.length, rows.join(','));
                 t.end();
             })
         })
