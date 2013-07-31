@@ -85,11 +85,11 @@ tap.test('poll icosphere', {skip: true}, function (t) {
     t.end();
 })
 
-tap.test('draw tessellated map of height', {timeout: 2000 * 1000, skip: false}, function (t) {
+tap.test('draw tessellated map of height', {timeout: 200 * 1000, skip: false}, function (t) {
 
     var draw_path = path.resolve(__dirname, './../test_resources/earth_tesselated.png');
     console.log('drawing %s', draw_path);
-    var planet = new Planet(7);
+    var planet = new Planet(5);
     var done = 0;
     var last_done = 0;
 
@@ -119,7 +119,7 @@ tap.test('draw tessellated map of height', {timeout: 2000 * 1000, skip: false}, 
 
                     var chroma = Math.min(1, Math.max(0, height / 6000));
                     chroma = Math.sqrt(chroma);
-                    chroma = new THREE.Color().setHSL(chroma, 1, chroma);
+                    chroma = new THREE.Color().setHSL(1 - chroma, 1, chroma);
                 }
                 if (Math.floor(done / 1000) > last_done) {
                     last_done = Math.floor(done / 1000);
