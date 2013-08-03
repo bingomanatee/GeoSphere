@@ -5,13 +5,13 @@ var _ = require('underscore');
 var _DEBUG = false;
 var THREE = require('three');
 var threeE = require('./../lib/util/THREE.ext');
-var canvas_to_file = require('./../lib/util/canvas_to_file');
-var Planet = require('./../lib/Planet');
+var canvas_to_file = require('./../../lib/util/canvas_to_file');
+var Planet = require('./../../lib/Planet');
 var Gate = require('gate');
 var fs = require('fs');
 var file_index = 0;
 
-var solar_transfer = require('./../lib/util/solar_transfer');
+var solar_transfer = require('./../../lib/util/weather/solar_transfer');
 
 /**
  * surface area of earth: 510,072,000 km^2

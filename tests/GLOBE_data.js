@@ -56,7 +56,7 @@ tap.test('draw map of UVs', {timeout: 200 * 1000, skip: false}, function (t) {
     console.log('drawing %s', draw_path);
     var planet = new Planet(4);
     planet.vertices().forEach(function (v, i) {
-        console.log('vertex %s index: %s', i, v.index);
+        if (_DEBUG) console.log('vertex %s index: %s', i, v.index);
         var c = new THREE.Color();
         c.setRGB(v.uv.x, v.uv.y, 1);
         planet.vertex_data(v.index, 'color', c);
