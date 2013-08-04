@@ -178,7 +178,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100 }, function (suite) {
                 var elevation = vertex.data('elevation');
                 if (elevation > 10000) elevation = 0;
                 var albedo = vertex.data('albedo') / 100;
-
+                //@TODO: homogenize data for oceans
                 // color.setRGB(elevation/1000, Math.sqrt(albedo), elevation ? 0 : 1);
                 // console.log('index: %s, elevation: %s, albedo: %s', vertex.index, elevation, albedo);
                 vertex.data('color', albedo);
