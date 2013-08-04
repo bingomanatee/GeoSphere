@@ -2,11 +2,16 @@ var tap = require('tap');
 var path = require('path');
 var util = require('util');
 var _ = require('underscore');
-var Planet = require('./../lib/Planet');
-var THREE = require('three');
-var _DEBUG = false;
-var canvas_to_file = require('./../lib/util/canvas_to_file');
 var fs = require('fs');
+var THREE = require('three');
+
+var GeoSphere = require('./../index');
+
+var Planet = GeoSphere.Planet;
+var canvas_to_file = GeoSphere.util.canvas_to_file;
+
+var _DEBUG = false;
+
 /* *********************** TEST SCAFFOLDING ********************* */
 
 function _brute_force_closest_point(s, x, y, z) {

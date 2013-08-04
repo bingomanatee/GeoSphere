@@ -2,10 +2,10 @@ var tap = require('tap');
 var path = require('path');
 var util = require('util');
 var _ = require('underscore');
-var Earth = require('./../lib/util/Earth');
+var Earth = require('./../../lib/climate/Earth/Earth');
 var _DEBUG = false;
 var THREE = require('three');
-var Planet = require('./../lib/Planet');
+var Planet = require('./../../lib/Planet');
 var Gate = require('gate');
 var fs = require('fs');
 

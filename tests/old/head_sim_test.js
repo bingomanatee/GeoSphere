@@ -11,7 +11,7 @@ var Gate = require('gate');
 var fs = require('fs');
 var file_index = 0;
 
-var solar_transfer = require('./../../lib/util/weather/solar_transfer');
+var solar_transfer = require('./.././solar_transfer');
 
 /**
  * surface area of earth: 510,072,000 km^2

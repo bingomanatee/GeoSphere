@@ -4,21 +4,23 @@ var path = require('path');
 var fs = require('fs');
 var tap = require('tap');
 var Table = require('cli-table');
-var Season_Sim = require('./../lib/util/weather/Season_Sim');
+
 var humanize = require('humanize');
 var _DEBUG = false;
 var Gate = require('gate');
-var readLine = require('./../lib/util/line_reader');
+var THREE = require('three');
 
 var SCALE = 3;
 var TIMEOUT_SECS = 10000;
-var Albedo = require('./../lib/util/weather/Albedo');
-var Cloud_Cover = require('./../lib/util/weather/Cloud_Cover');
-var Biomes = require('./../lib/util/weather/Biome');
-var THREE = require('three');
-var BLACK = new THREE.Color().setRGB(0,0,0);
 
-var WRITE_ROOT = path.resolve(__dirname, './../test_resources/Season_Sim_Test');
+var GeoSphere = require('./../index');
+var Season_Sim = GeoSphere.climate.Season_Sim;
+
+var Albedo = GeoSphere.climate.Albedo;
+var Cloud_Cover =  GeoSphere.climate.Cloud_Cover;
+var Biomes =  GeoSphere.climate.Biome;
+var BLACK = new THREE.Color().setRGB(0,0,0);
+var readLine = GeoSphere.util.line_reader;
 
 function _n(n) {
     return humanize.numberFormat(n, 4);
@@ -63,7 +65,7 @@ function _write_cache(test, depth) {
     var sim = new Season_Sim(depth);
 
     var time = new Date().getTime();
-    var file = path.resolve(__dirname, './../test_resources/Season_Sim_Test/sunlight_cache.' + depth + '.bin');
+    var file = path.resolve(WRITE_ROOT, 'sunlight_cache.' + depth + '.bin');
     var handle = fs.createWriteStream(file, {encoding: 'utf8'});
 
     _.range(0, 365).forEach(function (day) {
@@ -86,7 +88,7 @@ function _write_cache(test, depth) {
 
     handle.on('finish', function () {
         process.nextTick(function () {
-            console.log('file at depth %s written in %s seconds', depth, _n((new Date().getTime() - time) / 1000));
+         if (_DEBUG)   console.log('file at depth %s written in %s seconds', depth, _n((new Date().getTime() - time) / 1000));
             test.end();
         })
     })
@@ -94,9 +96,14 @@ function _write_cache(test, depth) {
 }
 
 
-tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, function (suite) {
+var tr = path.resolve(__dirname, './../test_resources');
+if (!fs.existsSync(tr)) fs.mkdirSync(tr);
+var WRITE_ROOT = path.resolve(tr, 'Season_Sim_test');
+if (!fs.existsSync(WRITE_ROOT)) fs.mkdirSync(WRITE_ROOT);
 
-    suite.test('sunlight generation', {timeout: 1000 * 10, skip: true }, function (ss_test) {
+tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100 }, function (suite) {
+
+    suite.test('sunlight generation', {timeout: 1000 * 10, skip: 1 }, function (ss_test) {
 
         var gate = Gate.create();
 
@@ -104,7 +111,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
 
         sim.set_time(0, 0);
 
-        console.log('sun at hour 0');
+       if (_DEBUG) console.log('sun at hour 0');
         _render_sim(sim, 0, gate.latch());
 
         sim.set_time(0, 12);
@@ -116,7 +123,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
         })
     });
 
-    suite.test('caching sunlight', {timeout: 1000 * TIMEOUT_SECS, skip: true }, function (cache_test) {
+    suite.test('caching sunlight', {timeout: 1000 * TIMEOUT_SECS, skip: 1 }, function (cache_test) {
 
         cache_test.test('depth 1', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (t) {
 
@@ -164,7 +171,6 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
         var albedo = new Albedo(5);
 
         albedo.load(function () {
-            console.log('done reading albedo');
             var scale = 5;
 
             albedo.planet.vertices(function (vertex) {
@@ -185,23 +191,29 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
 
     });
 
-    suite.test('cloud cover', {skip: true}, function (cct) {
+    suite.test('cloud cover', {timeout: 1000 * TIMEOUT_SECS, skip: false}, function (cct) {
 
         var cover = new Cloud_Cover(4);
 
         var gate = Gate.create();
+        console.log('new cloud cover');
         cover.init(function () {
-
+            console.log('cloud cover initialized');
             _.range(0, 12).forEach(function (month) {
+                var ll = gate.latch();
+                process.nextTick(function(){
 
-                cover.planet.vertices(function (vertex) {
-                    var cc = vertex.data('cloud_cover');
-                    vertex.data('color', cc[month]);
-                });
+                    cover.planet.vertices(function (vertex) {
+                        var cc = vertex.data('cloud_cover');
+                       if (!(vertex.index % 10) && month == 11) console.log('cloud cover for %s is %s', vertex.index, cc.join(','));
+                        vertex.data('color', cc[month]);
+                    });
 
-                cover.planet.draw_triangles(720, 360,
-                    path.resolve(__dirname, './../test_resources/Season_Sim_Test/cloud_cover_' + month + '.png'),
-                    gate.latch());
+
+                  cover.planet.draw_triangles(720, 360,
+                        path.resolve(WRITE_ROOT, 'cloud_cover_' + month + '.png'),
+                       ll);
+                })
 
             });
 
@@ -227,7 +239,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
         var cum_radiation = 0;
         sim.init(function () {
             _.range(0, 365, 7).forEach(function (day) {
-                console.log('day %s', day);
+              if (_DEBUG)  console.log('day %s', day);
                 _.range(0, 24, 3).forEach(function (hour) {
                     sim.set_time(day, hour);
 
@@ -241,7 +253,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
                     })
                     total_radiation.push(total_rad);
                     cum_radiation += total_rad;
-                    console.log('total_rad: %s, cum_rad: %s', total_rad, cum_radiation);
+                  if(_DEBUG)  console.log('total_rad: %s, cum_rad: %s', total_rad, cum_radiation);
 
                     var file = path.resolve(__dirname, './../test_resources/Season_Sim_Test/srb/radiation.' + index + '.png');
                     sim.planet.draw_triangles(720, 360, file, gate.latch());
@@ -261,36 +273,11 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, funct
         });
 
 
-    })
-
-    suite.test('Biomes reading', {skip: true}, function(t){
-
-        var handle = readLine(Biomes.FILE);
-
-        handle.on('line', function(line){
-            console.log('test reading %s', line);
-        });
-
-        handle.on('end', function () {
-            console.log('done lading biome');
-            t.end();
-        });
-
-        handle.on('error', function(err){
-            throw err;
-        })
-
     });
 
     suite.test('biomes', {timeout: 1000 * TIMEOUT_SECS, skip: false}, function (bt) {
 
-        var legend_done = false;
         Biomes.make_legend(path.resolve(WRITE_ROOT, 'biome_legend.png'), function () {
-            if (legend_done) {
-                console.log('mld');
-                return;
-            }
-            legend_done = true;
 
             var BIOME_SCALE = 5;
 

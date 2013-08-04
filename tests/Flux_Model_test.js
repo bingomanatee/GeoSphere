@@ -6,7 +6,7 @@ var tap = require('tap');
 
 var humanize = require('humanize');
 var Table = require('cli-table');
-var Flux_Model = require('./../lib/util/weather/Flux_Model');
+var Flux_Model = require('././Flux_Model');
 var _DEBUG = false;
 
 function _n(n) {
