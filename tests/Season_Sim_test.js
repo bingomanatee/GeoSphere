@@ -8,13 +8,17 @@ var Season_Sim = require('./../lib/util/weather/Season_Sim');
 var humanize = require('humanize');
 var _DEBUG = false;
 var Gate = require('gate');
+var readLine = require('./../lib/util/line_reader');
 
 var SCALE = 3;
 var TIMEOUT_SECS = 10000;
 var Albedo = require('./../lib/util/weather/Albedo');
 var Cloud_Cover = require('./../lib/util/weather/Cloud_Cover');
-var Surface_Radiation_Budget = require('./../lib/util/weather/Surface_Radiation_Budget');
+var Biomes = require('./../lib/util/weather/Biome');
 var THREE = require('three');
+var BLACK = new THREE.Color().setRGB(0,0,0);
+
+var WRITE_ROOT = path.resolve(__dirname, './../test_resources/Season_Sim_Test');
 
 function _n(n) {
     return humanize.numberFormat(n, 4);
@@ -90,7 +94,7 @@ function _write_cache(test, depth) {
 }
 
 
-tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (suite) {
+tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100, skip: false }, function (suite) {
 
     suite.test('sunlight generation', {timeout: 1000 * 10, skip: true }, function (ss_test) {
 
@@ -155,7 +159,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (s
         cache_test.end();
     });
 
-    suite.test('reading albedo', {timeout: 1000 * TIMEOUT_SECS, skip: true}, function (albedo_test) {
+    suite.test('reading albedo', {timeout: 1000 * TIMEOUT_SECS, skip: false}, function (albedo_test) {
 
         var albedo = new Albedo(5);
 
@@ -209,7 +213,7 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (s
 
     });
 
-    suite.test('Surface Radiation Budget', {timeout: 100 * TIMEOUT_SECS * 1000}, function (srb) {
+    suite.test('Surface Radiation Budget', {timeout: 100 * TIMEOUT_SECS * 1000, skip: true}, function (srb) {
 
         var index = 0;
         var time = new Date().getTime();
@@ -219,22 +223,29 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (s
         var RANGE = MAX_ENERGY - MIN_ENERGY;
         var gate = Gate.create();
 
+        var total_radiation = [];
+        var cum_radiation = 0;
         sim.init(function () {
-            _.range(0, 10).forEach(function (day) {
-                _.range(0, 24).forEach(function (hour) {
-                        sim.set_time(day, hour);
+            _.range(0, 365, 7).forEach(function (day) {
+                console.log('day %s', day);
+                _.range(0, 24, 3).forEach(function (hour) {
+                    sim.set_time(day, hour);
 
-                        sim.planet.vertices(function (vertex) {
-                            var radiation = vertex.data('radiation');
-                            if (!day && !hour){
-                                console.log('vertex: %s , radiation: %s', vertex.index, radiation);
-                            }
-                            vertex.data('color', 1 - (radiation - MIN_ENERGY) / RANGE);
-                        })
+                    var total_rad = 0;
 
-                        var file = path.resolve(__dirname, './../test_resources/Season_Sim_Test/srb/radiation.' + index + '.png');
-                        sim.planet.draw_triangles(720, 360, file, gate.latch());
-                        ++index;
+                    sim.planet.vertices(function (vertex) {
+                        var radiation = parseFloat(vertex.data('radiation'));
+                        if (isNaN(radiation)) radiation = 0;
+                        total_rad += radiation;
+                        vertex.data('color', 1 - (radiation - MIN_ENERGY) / RANGE);
+                    })
+                    total_radiation.push(total_rad);
+                    cum_radiation += total_rad;
+                    console.log('total_rad: %s, cum_rad: %s', total_rad, cum_radiation);
+
+                    var file = path.resolve(__dirname, './../test_resources/Season_Sim_Test/srb/radiation.' + index + '.png');
+                    sim.planet.draw_triangles(720, 360, file, gate.latch());
+                    ++index;
 
                 });
             });
@@ -242,7 +253,8 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (s
             gate.await(function () {
                 var duration = new Date().getTime() - time;
                 duration /= 1000;
-                console.log('time: %s, per image: %s', _n(duration), _n(duration/index));
+                console.log('time: %s, per image: %s, total_radiation: %s',
+                    _n(duration), _n(duration / index), cum_radiation);
                 srb.end();
             })
 
@@ -250,6 +262,68 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS, skip: false }, function (s
 
 
     })
+
+    suite.test('Biomes reading', {skip: true}, function(t){
+
+        var handle = readLine(Biomes.FILE);
+
+        handle.on('line', function(line){
+            console.log('test reading %s', line);
+        });
+
+        handle.on('end', function () {
+            console.log('done lading biome');
+            t.end();
+        });
+
+        handle.on('error', function(err){
+            throw err;
+        })
+
+    });
+
+    suite.test('biomes', {timeout: 1000 * TIMEOUT_SECS, skip: false}, function (bt) {
+
+        var legend_done = false;
+        Biomes.make_legend(path.resolve(WRITE_ROOT, 'biome_legend.png'), function () {
+            if (legend_done) {
+                console.log('mld');
+                return;
+            }
+            legend_done = true;
+
+            var BIOME_SCALE = 5;
+
+            var biome = new Biomes(BIOME_SCALE);
+            var loaded = false;
+            biome.load(function () {
+
+                biome.planet.vertices(function (vertex) {
+                    var main = vertex.data('main_biome');
+                    if (main) {
+                        var biome = _.find(Biomes.DATA, function (biome) {
+                            return biome.biome == main;
+                        });
+                        var color = biome ? biome.color : BLACK;
+                        vertex.data('color', color);
+                    } else {
+                        vertex.data('color', BLACK);
+                    }
+                });
+
+                biome.planet.draw_triangles(
+                    360 * BIOME_SCALE,
+                    180 * BIOME_SCALE,
+                    path.resolve(WRITE_ROOT, 'biomes.png'),
+                    function () {
+                        bt.end();
+                    }
+                )
+            });
+
+        });
+
+    });
 
     suite.end();
 

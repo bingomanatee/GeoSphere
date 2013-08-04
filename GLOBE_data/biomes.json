@@ -1,0 +1,193 @@
+[
+    {
+        "biome": "TUND",
+        "description": "tundra",
+        "bowen_ratio": 5,
+        "class": "tundra",
+        "temp": -3
+    },
+    {
+        "biome": "TAIG",
+        "description": "taiga",
+        "bowen_ratio": 1,
+        "class": "tundra",
+        "temp": -2
+    },
+    {
+        "biome": "CLDE",
+        "description": "cold deciduous forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "d",
+        "temp": -2
+    },
+    {
+        "biome": "CLMX",
+        "description": "cold mixed forest",
+        "bowen_ratio": 0.8,
+        "class": "forest",
+        "trees": "m",
+        "temp": -2
+    },
+    {
+        "biome": "COCO",
+        "description": "cool conifer forest",
+        "bowen_ratio": 0.8,
+        "class": "forest",
+        "trees": "c",
+        "temp": -1
+    },
+    {
+        "biome": "COMX",
+        "description": "cool mixed forest",
+        "bowen_ratio": 0.8,
+        "class": "forest",
+        "trees": "m",
+        "temp": -1
+    },
+    {
+        "biome": "TEDE",
+        "description": "temperate deciduous forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "d",
+        "temp": -1
+    },
+    {
+        "biome": "TECO",
+        "description": "temperate conifer forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "c",
+        "temp": 0
+    },
+    {
+        "biome": "WAMF",
+        "description": "broadleaved evergreen/warm mixed forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "e",
+        "temp": 1
+    },
+    {
+        "biome": "TDFO",
+        "description": "tropical dry forest/savanna",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "m",
+        "temp": 2
+    },
+    {
+        "biome": "TSFO",
+        "description": "tropical seasonal forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "c",
+        "temp": 2
+    },
+    {
+        "biome": "OC",
+        "description": "open conifer woodland",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "c",
+        "temp": 0
+    },
+    {
+        "biome": "XERO",
+        "description": "xerophytic woods/scrub",
+        "bowen_ratio": 1,
+        "class": "scrub",
+        "temp": 1
+    },
+    {
+        "biome": "SAVA",
+        "description": "savanna",
+        "bowen_ratio": 5,
+        "class": "scrub",
+        "temp": 1
+    },
+    {
+        "biome": "STEP",
+        "description": "steppe",
+        "bowen_ratio": 5,
+        "class": "scrub",
+        "temp": 2
+    },
+    {
+        "biome": "DESE",
+        "description": "desert",
+        "bowen_ratio": 10,
+        "class": "scrub",
+        "temp": 3
+    },
+    {
+        "biome": "TXBS",
+        "description": "Tropical xerophytic bush/savanna",
+        "bowen_ratio": 5,
+        "class": "scrub",
+        "temp": 2
+    },
+    {
+        "biome": "WAGR",
+        "description": "Warm grass/shrub",
+        "bowen_ratio": 0.2,
+        "class": "scrub",
+        "temp": 2
+    },
+    {
+        "biome": "TDFO",
+        "description": "Tropical dry forest/savanna",
+        "bowen_ratio": 1,
+        "class": "forest",
+        "trees": "m",
+        "temp": 2
+    },
+    {
+        "biome": "TSFO",
+        "description": "Tropical seasonal forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "m",
+        "temp": 2
+    },
+    {
+        "biome": "TRFO",
+        "description": "Tropical rain forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "j",
+        "temp": 3
+    },
+    {
+        "biome": "COGS",
+        "description": "Cool grass/shrub",
+        "bowen_ratio": 0.2,
+        "class": "scrub",
+        "temp": -1
+
+    },
+    {
+        "biome": "WAMF",
+        "description": "Warm mixed forest",
+        "bowen_ratio": 0.6,
+        "class": "forest",
+        "trees": "m",
+        "temp": 1
+    },
+    {
+        "biome": "TEMS",
+        "description": "Temperate microphyllous shrubland",
+        "bowen_ratio": 0.2,
+        "class": "scrub",
+        "temp": 0
+    },
+    {
+        "biome": "TEXE",
+        "description": "Temperate xerophytic woods/shrubs",
+        "bowen_ratio": 0.4,
+        "class": "forest",
+        "trees": "m",
+        "temp": 0
+    }
+]

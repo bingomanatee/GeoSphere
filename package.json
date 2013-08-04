@@ -13,7 +13,7 @@
     "simplex-noise": "~2.1.1",
     "express": "~3.3.4",
     "readline": "0.0.3",
-    "line-by-line": "~0.1.1"
+    "line-input-stream": "~1.0.1"
   },
   "devDependencies": {
     "mocha": "0.3.0",
