@@ -1,32 +1,53 @@
 {
-  "name": "GeoSphere",
-  "version": "0.0.1",
-  "private": false,
-  "scripts": {},
+  "name": "geosphere",
+  "version": "0.0.2",
+  "description": "A world data analysis tool based on Three.js's Tesselated sphere and various Public data sources. ",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
   "dependencies": {
-    "three": ">= 0.58.9",
-    "underscore": ">=1.4.3",
-    "async": "0.1.22",
-    "canvas": "1.0.3",
-    "humanize": "0.0.6",
-    "mongoose": "~3.6.4",
-    "simplex-noise": "~2.1.1",
+    "chai": "~1.4.2",
+    "async": "~0.1.22",
     "express": "~3.3.4",
-    "readline": "0.0.3",
-    "line-input-stream": "~1.0.1"
+    "cli-table": "~0.2.0",
+    "mkdirp": "~0.3.4",
+    "csv": "~0.3.4",
+    "mongoose": "~3.6.15",
+    "rmdir": "~1.0.0",
+    "should": "~1.2.1",
+    "line-input-stream": "~1.0.1",
+    "spec": "~1.0.0",
+    "simplex-noise": "~2.1.1",
+    "humanize": "~0.0.6",
+    "underscore": "~1.5.1",
+    "node-static": "~0.7.0",
+    "three": "~0.58.9",
+    "gate": "~0.3.0",
+    "canvas": "~1.0.3"
   },
   "devDependencies": {
-    "mocha": "0.3.0",
-    "spec": "*",
-    "mkdirp": "0.3.4",
-    "rmdir": "1.0.0",
-    "chai": "1.4.2",
-    "should": "1.2.1",
-    "gate": "~0.3.0",
-    "csv": "~0.3.0",
-    "node-static": "~0.7.0",
-    "tap": "~0.4.3",
-    "cli-table": "~0.2.0"
+    "mocha": "~0.3.0",
+    "tap": "~0.4.3"
   },
-  "test": "mocha tests -R spec"
+  "scripts": {
+    "test": "tap tests/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bingomanatee/GeoSphere.git"
+  },
+  "keywords": [
+    "global",
+    "data",
+    "elevation",
+    "three.js",
+    "world",
+    "earth"
+  ],
+  "author": "Dave Edelhart",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/bingomanatee/GeoSphere/issues"
+  }
 }
