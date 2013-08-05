@@ -196,16 +196,14 @@ tap.test('Season_Sim', {timeout: 1000 * TIMEOUT_SECS * 100 }, function (suite) {
         var cover = new Cloud_Cover(4);
 
         var gate = Gate.create();
-        console.log('new cloud cover');
         cover.init(function () {
-            console.log('cloud cover initialized');
             _.range(0, 12).forEach(function (month) {
                 var ll = gate.latch();
                 process.nextTick(function(){
 
                     cover.planet.vertices(function (vertex) {
                         var cc = vertex.data('cloud_cover');
-                       if (!(vertex.index % 10) && month == 11) console.log('cloud cover for %s is %s', vertex.index, cc.join(','));
+                       if (_DEBUG) console.log('cloud cover for %s is %s', vertex.index, cc.join(','));
                         vertex.data('color', cc[month]);
                     });
 
