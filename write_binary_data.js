@@ -26,15 +26,4 @@ if (process.argv.length > 2) {
 
 console.log('WRITING BINARY DATA for %s: depths %s ... %s, %s px X %s px images',  mode, MIN_DEPTH, MAX_DEPTH, WIDTH, HEIGHT)
 
-switch (mode) {
-    case 'clouds':
-        require('./lib/binary/clouds')(MIN_DEPTH, MAX_DEPTH, WIDTH, HEIGHT);
-        break;
-
-    case 'albedo':
-        require('./lib/binary/albedo')(MIN_DEPTH, MAX_DEPTH, WIDTH, HEIGHT);
-        break;
-
-    default:
-        throw new Error('cannot find mode ' + mode);
-}
+require('./lib/binary/' + mode)(MIN_DEPTH, MAX_DEPTH, WIDTH, HEIGHT);
