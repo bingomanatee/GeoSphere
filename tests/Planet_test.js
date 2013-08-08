@@ -186,7 +186,7 @@ tap.test('Planet', {timeout: TIMEOUT}, function (t) {
         t.end();
     });
 
-    t.test('draw', {timeout: 60 * 1000, skip: true}, function (t) {
+    t.test('draw', {timeout: 60 * 1000, skip: false}, function (t) {
 
         t.test('draw 0', {timeout: 60 * 1000}, function (tt) {
             _draw(0, tt);
