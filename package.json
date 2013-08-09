@@ -24,7 +24,8 @@
     "node-static": "~0.7.0",
     "three": "~0.58.9",
     "gate": "~0.3.0",
-    "canvas": "~1.0.3"
+    "canvas": "~1.0.3",
+    "msgpack": "~0.1.11"
   },
   "devDependencies": {
     "mocha": "~0.3.0",
