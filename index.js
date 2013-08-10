@@ -15,7 +15,8 @@ var GeoSphere = {
     CLIMATE_ROOT: path.resolve(__dirname,  '../climate_data'),
     CLIMATE_BINARY: path.resolve(__dirname, 'climate_binary_data'),
     PLANET_BINARY: path.resolve(__dirname, 'planet_binary_data'),
-    Sector: require('./lib/Sector.js')
+    Sector: require('./lib/Sector.js'),
+    model: require('./lib/model')
 };
 
 module.exports = GeoSphere;

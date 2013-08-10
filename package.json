@@ -13,7 +13,7 @@
     "cli-table": "~0.2.0",
     "mkdirp": "~0.3.4",
     "csv": "~0.3.4",
-    "mongoose": "~3.6.15",
+    "mongoose": "~3.6.16",
     "rmdir": "~1.0.0",
     "should": "~1.2.1",
     "line-input-stream": "~1.0.1",

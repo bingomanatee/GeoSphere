@@ -1,0 +1,20 @@
+{
+    "_id": "string",
+    "detail": "number",
+    "order": "number",
+    "real_order": "number",
+    "parent": "string",
+    "child": "string",
+    "coords": {
+        "x": "number",
+        "y": "number",
+       "z": "number"
+    },
+
+    "uv": {
+        "x": "number",
+        "y": "number"
+    },
+    "coordinates": ["number"],
+    "neighbors": ["number" ]
+}
