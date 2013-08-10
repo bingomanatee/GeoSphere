@@ -25,7 +25,8 @@
     "three": "~0.58.9",
     "gate": "~0.3.0",
     "canvas": "~1.0.3",
-    "msgpack": "~0.1.11"
+    "msgpack": "~0.1.11",
+    "couchbase": "0.0.12"
   },
   "devDependencies": {
     "mocha": "~0.3.0",
