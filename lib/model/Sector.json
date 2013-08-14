@@ -1,0 +1,6 @@
+{
+    "_id": "string",
+    "depth": "number",
+    "sector_number": "number",
+    "real_orders": ["number"]
+}

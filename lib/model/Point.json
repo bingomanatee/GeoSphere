@@ -16,5 +16,6 @@
         "y": "number"
     },
     "coordinates": ["number"],
-    "neighbors": ["number" ]
+    "neighbors": ["number" ],
+    "ordered_neighbors": ["number"]
 }
